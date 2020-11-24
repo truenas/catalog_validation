@@ -61,6 +61,16 @@ def validate_catalog_item(catalog_item_path, schema):
 
     if 'item.yaml' not in files:
         verrors.add(f'{schema}.item', 'Item configuration (item.yaml) not found')
+    else:
+        with open(os.path.join(catalog_item_path, 'item.yaml'), 'r') as f:
+            item_config = yaml.safe_load(f.read())
+            for key, value_type in (
+                ('categories', list),
+            ):
+                if key not in item_config:
+                    verrors.add(f'{schema}.item_config.{key}', f'{key!r} not present in "item.yaml"')
+                elif type(item_config[key]) != value_type:
+                    verrors.add(f'{schema}.item_config.{key}', f'{key!r} should be {value_type.__name__!r}.')
 
     for version_path in versions:
         try:
