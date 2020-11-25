@@ -8,12 +8,12 @@ setup(
     description='Validate TrueNAS Catalog(s)',
     version=VERSION,
     include_package_data=True,
-    packages=['catalog_validation'],
+    packages=find_packages(),
     license='GNU3',
     platforms='any',
     entry_points={
         'console_scripts': [
-            'catalog_validate = scripts.catalog_validate:main',
+            'catalog_validate = catalog_validation.scripts.catalog_validate:main',
         ],
     },
 )
