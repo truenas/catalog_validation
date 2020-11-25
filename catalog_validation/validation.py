@@ -97,12 +97,15 @@ def validate_catalog_item_version(version_path, schema):
 
         if chart_config.get('version') != version_name:
             verrors.add(
-                f'{schema}.name', 'Configured version name in "Chart.yaml" does not match version directory name.'
+                f'{schema}.version', 'Configured version in "Chart.yaml" does not match version directory name.'
             )
 
     questions_path = os.path.join(version_path, 'questions.yaml')
     if os.path.exists(questions_path):
-        validate_questions_yaml(questions_path, f'{schema}.questions_configuration')
+        try:
+            validate_questions_yaml(questions_path, f'{schema}.questions_configuration')
+        except ValidationErrors as v:
+            verrors.extend(v)
 
     verrors.check()
 
