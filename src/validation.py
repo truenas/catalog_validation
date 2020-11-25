@@ -4,16 +4,12 @@ import yaml
 from semantic_version import Version
 
 from .exceptions import CatalogDoesNotExist, ValidationErrors
-from .utils import WANTED_FILES_IN_ITEM_VERSION
+from .utils import SCHEMA_MAPPING, validate_key_value_types, WANTED_FILES_IN_ITEM_VERSION
 
 
 def validate_catalog(catalog_path):
     if not os.path.exists(catalog_path):
         raise CatalogDoesNotExist(catalog_path)
-
-    # We will be doing following steps to ensure a catalog is compliant:
-    # 1) Each directory under root is a valid train further containing catalog items
-    # 2)
 
     verrors = ValidationErrors()
 
@@ -109,4 +105,86 @@ def validate_catalog_item_version(version_path, schema):
                 f'{schema}.name', 'Configured version name in "Chart.yaml" does not match version directory name.'
             )
 
+    questions_path = os.path.join(version_path, 'questions.yaml')
+    if os.path.exists(questions_path):
+        validate_questions_yaml(questions_path, f'{schema}.questions_configuration')
+
     verrors.check()
+
+
+def validate_questions_yaml(questions_yaml_path, schema):
+    with open(questions_yaml_path, 'r') as f:
+        questions_config = yaml.safe_load(f.read())
+
+    verrors = ValidationErrors()
+
+    validate_key_value_types(questions_config, (('groups', list), ('questions', list)), verrors, schema)
+
+    groups = []
+    if type(questions_config.get('groups')) == list:
+        for index, group in enumerate(questions_config['groups']):
+            if type(group) != dict:
+                verrors.add(f'{schema}.group.{index}', 'Type of group should be a dictionary.')
+                continue
+
+            if group.get('name'):
+                groups.append(group['name'])
+
+            validate_key_value_types(group, (('name', str), ('description', str)), verrors, f'{schema}.group.{index}')
+
+    if type(questions_config.get('questions')) != list:
+        # We only want to raise verrors here if questions is not a list as otherwise we can raise them at the end
+        # after validating the questions
+        verrors.check()
+
+    for index, question in enumerate(questions_config['questions']):
+        validate_question(question, f'{schema}.questions.{index}', verrors, (('group', str),))
+        if question.get('group') and question['group'] not in groups:
+            verrors.add(f'{schema}.questions.{index}.group', f'Please specify a group declared in "{schema}.groups"')
+
+    verrors.check()
+
+
+def validate_question(question_data, schema, verrors, validate_top_level_attrs=None):
+    if type(question_data) != dict:
+        verrors.add(schema, 'Question must be a valid dictionary.')
+        return
+
+    validate_top_level_attrs = validate_top_level_attrs or tuple()
+    validate_key_value_types(
+        question_data, (('variable', str), ('label', str), ('schema', dict)) + validate_top_level_attrs, verrors, schema
+    )
+    if type(question_data.get('schema')) != dict:
+        return
+
+    schema_data = question_data['schema']
+    validate_key_value_types(schema_data, (('type', str),), verrors, f'{schema}.schema')
+
+    if type(schema_data.get('type')) != str:
+        return
+
+    variable_type = schema_data['type']
+    if variable_type not in SCHEMA_MAPPING:
+        verrors.add(f'{schema}.schema.type', 'Invalid schema type specified.')
+        return
+
+    mapping = SCHEMA_MAPPING[variable_type]
+    for key, value in schema_data.items():
+        if key not in mapping:
+            verrors.add(f'{schema}.schema', f'{key!r} not allowed with {variable_type!r} variable schema.')
+            continue
+        if value is None:
+            continue
+        if type(value) != mapping[key]:
+            verrors.add(f'{schema}.schema.{key}', f'Expected {mapping[key].__name__!r} value type.')
+
+    for condition, key, schema_str in (
+        (variable_type != 'list', 'subquestions', f'{schema}.schema.subquestions'),
+        (variable_type == 'list', 'items', f'{schema}.schema.items'),
+        (variable_type == 'dict', 'attrs', f'{schema}.schema.attrs'),
+    ):
+        if not (condition and type(schema_data.get(key)) == list):
+            continue
+
+        for index, item in enumerate(schema_data[key]):
+            validate_question(item, f'{schema_str}.{index}', verrors)
