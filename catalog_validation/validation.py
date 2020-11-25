@@ -60,13 +60,8 @@ def validate_catalog_item(catalog_item_path, schema):
     else:
         with open(os.path.join(catalog_item_path, 'item.yaml'), 'r') as f:
             item_config = yaml.safe_load(f.read())
-            for key, value_type in (
-                ('categories', list),
-            ):
-                if key not in item_config:
-                    verrors.add(f'{schema}.item_config.{key}', f'{key!r} not present in "item.yaml"')
-                elif type(item_config[key]) != value_type:
-                    verrors.add(f'{schema}.item_config.{key}', f'{key!r} should be {value_type.__name__!r}.')
+
+        validate_key_value_types(item_config, (('categories', list),), verrors, f'{schema}.item_config')
 
     for version_path in versions:
         try:
