@@ -18,7 +18,7 @@ def validate(catalog_path):
             print(f'[\033[91m{index}\x1B[0m]\t{verror}')
         exit(1)
     else:
-        print(f'[\033[92mOK\x1B[0m]\tPASSED VALIDATION CHECKS')
+        print('[\033[92mOK\x1B[0m]\tPASSED VALIDATION CHECKS')
 
 
 def main():
