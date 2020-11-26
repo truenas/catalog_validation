@@ -6,7 +6,7 @@ from .k8s.api_client import api_client
 
 
 def setup_kubernetes_cluster():
-    subprocess.run('curl -sfL https://get.k3s.io | sh -', shell=True, check=True, timeout=300)
+    subprocess.run('curl -sfL https://get.k3s.io | sh -', shell=True, check=True, timeout=300, capture_output=True)
     # This call returns after starting k3s, however we will wait and ensure it is properly setup ( there are no
     # taints etc ) before actually trying to deploy resources
     count = 0

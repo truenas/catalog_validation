@@ -12,6 +12,7 @@ from catalog_validation.setup_kubernetes import setup_kubernetes_cluster
 def deploy_charts(catalog_path, base_branch):
 
     affected_items = []
+    print('[\033[94mINFO\x1B[0m]\tDetermining changed catalog items')
     try:
         affected_items = get_affected_catalog_items_with_versions(catalog_path, base_branch)
     except CatalogDoesNotExist:
@@ -25,7 +26,11 @@ def deploy_charts(catalog_path, base_branch):
         print('[\033[92mOK\x1B[0m]\tNo changed catalog items detected')
         exit(0)
 
+    print(
+        f'[\033[94mINFO\x1B[0m]\tChanged catalog items detected: {",".join(".".join(item) for item in affected_items)}'
+    )
     # Now we wil setup kubernetes cluster
+    print('[\033[94mINFO\x1B[0m]\tSetting up kubernetes cluster')
     try:
         setup_kubernetes_cluster()
     except (subprocess.CalledProcessError, KubernetesSetupException) as e:
@@ -35,26 +40,28 @@ def deploy_charts(catalog_path, base_branch):
     # We should have kubernetes running as desired now
     # We expect helm to already be installed in the environment
     failures = []
+    env = dict(os.environ, KUBECONFIG=KUBECONFIG_FILE)
     for index, catalog_item in enumerate(affected_items):
-        from catalog_validation.utils import CatalogItem
-        catalog_item = CatalogItem()
+        print(f'[\033[94mINFO\x1B[0m]\tInstalling {".".join(catalog_item)}')
         chart_path = os.path.join(catalog_path, catalog_item.train, catalog_item.item, catalog_item.version)
-        chart_release_name = f'{catalog_item.item}_{index}'
+        chart_release_name = f'{catalog_item.item}-{index}'
         cp = subprocess.Popen(
             [
                 'helm', 'install', chart_release_name, chart_path, '-n',
                 chart_release_name, '--create-namespace', '--wait',
                 '-f', os.path.join(chart_path, 'test_values.yaml'),
-            ], env=dict(os.environ, KUBECONFIG=KUBECONFIG_FILE), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+            ], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
         )
-        stderr = cp.communicate(timeout=300)[0]
+        stderr = cp.communicate(timeout=300)[1]
         if cp.returncode:
             failures.append(f'Failed to install chart release {".".join(catalog_item)}: {stderr.decode()}')
             continue
 
+        print(f'[\033[94mINFO\x1B[0m]\tTesting {".".join(catalog_item)}')
         # We have deployed the chart release, now let's test it
         cp = subprocess.Popen(
-            ['helm', 'test', chart_release_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            ['helm', 'test', chart_release_name, '-n', chart_release_name],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env,
         )
         cp.communicate(timeout=300)
         if cp.returncode:
