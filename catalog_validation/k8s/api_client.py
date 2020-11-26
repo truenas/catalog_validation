@@ -12,4 +12,4 @@ def api_client():
     try:
         yield client.CoreV1Api(api_cl)
     finally:
-        await api_cl.close()
+        api_cl.close()

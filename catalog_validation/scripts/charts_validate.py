@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+import argparse
+import os
+import subprocess
+
+from catalog_validation.exceptions import CatalogDoesNotExist, KubernetesSetupException
+from catalog_validation.git_utils import get_affected_catalog_items_with_versions
+from catalog_validation.k8s.utils import KUBECONFIG_FILE
+from catalog_validation.setup_kubernetes import setup_kubernetes_cluster
+
+
+def deploy_charts(catalog_path, base_branch):
+
+    affected_items = []
+    try:
+        affected_items = get_affected_catalog_items_with_versions(catalog_path, base_branch)
+    except CatalogDoesNotExist:
+        print(f'[\033[91mFAILED\x1B[0m]\tSpecified {catalog_path!r} path does not exist')
+        exit(1)
+    except subprocess.CalledProcessError as e:
+        print(f'[\033[91mFAILED\x1B[0m]\tFailed to determine changed catalog items: {e}')
+        exit(1)
+
+    if not affected_items:
+        print('[\033[92mOK\x1B[0m]\tNo changed catalog items detected')
+        exit(0)
+
+    # Now we wil setup kubernetes cluster
+    try:
+        setup_kubernetes_cluster()
+    except (subprocess.CalledProcessError, KubernetesSetupException) as e:
+        print(f'[\033[91mFAILED\x1B[0m]\tFailed to setup kubernetes cluster: {e}')
+        exit(1)
+
+    # We should have kubernetes running as desired now
+    # We expect helm to already be installed in the environment
+    failures = []
+    for index, catalog_item in enumerate(affected_items):
+        from catalog_validation.utils import CatalogItem
+        catalog_item = CatalogItem()
+        chart_path = os.path.join(catalog_path, catalog_item.train, catalog_item.item, catalog_item.version)
+        chart_release_name = f'{catalog_item.item}_{index}'
+        cp = subprocess.Popen(
+            [
+                'helm', 'install', chart_release_name, chart_path, '-n',
+                chart_release_name, '--create-namespace', '--wait',
+                '-f', os.path.join(chart_path, 'test_values.yaml'),
+            ], env=dict(os.environ, KUBECONFIG=KUBECONFIG_FILE), stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+        )
+        stderr = cp.communicate(timeout=300)[0]
+        if cp.returncode:
+            failures.append(f'Failed to install chart release {".".join(catalog_item)}: {stderr.decode()}')
+            continue
+
+        # We have deployed the chart release, now let's test it
+        cp = subprocess.Popen(
+            ['helm', 'test', chart_release_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
+        cp.communicate(timeout=300)
+        if cp.returncode:
+            failures.append(f'Helm test failed for {".".join(catalog_item)}')
+
+    if not failures:
+        print('[\033[92mOK\x1B[0m]\tTests passed successfully')
+        exit(0)
+
+    print('[\033[91mFAILED\x1B[0m]\tFollowing errors were encountered while testing catalog items:')
+    for index, failure in enumerate(failures):
+        print(f'[\033[91m{index}\x1B[0m]\t{failure}')
+
+    exit(1)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(help='sub-command help', dest='action')
+
+    parser_setup = subparsers.add_parser(
+        'deploy', help='Validate TrueNAS catalog items by deploying them in kubernetes cluster'
+    )
+    parser_setup.add_argument('--path', help='Specify path of TrueNAS catalog', required=True)
+    parser_setup.add_argument(
+        '--base_branch', help='Specify base branch to find changed catalog items', default='master'
+    )
+
+    args = parser.parse_args()
+    if args.action == 'deploy':
+        deploy_charts(args.path, args.base_branch)
+    else:
+        parser.print_help()
+
+
+if __name__ == '__main__':
+    main()
