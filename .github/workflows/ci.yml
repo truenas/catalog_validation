@@ -5,12 +5,13 @@ on: [push]
 jobs:
   build-deb:
     runs-on: ubuntu-latest
+    container:
+      image: ixsystems/catalog_validation:latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Install dependencies
-        run: /bin/bash -c "sudo apt update && sudo apt install -y build-essential devscripts equivs && sudo mk-build-deps --build-dep && sudo apt install -y ./*.deb"
       - name: Build deb package
         run: >
           dpkg-buildpackage

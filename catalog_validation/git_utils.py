@@ -10,7 +10,7 @@ def get_affected_catalog_items_with_versions(catalog_path, base_branch='master')
         raise CatalogDoesNotExist(catalog_path)
 
     cp = subprocess.run(
-        ['git', '-C', catalog_path, '--no-pager', 'diff', '--name-only', f'{base_branch}...HEAD'],
+        ['git', '-C', catalog_path, '--no-pager', 'diff', '--name-only', base_branch],
         capture_output=True, check=True,
     )
     items_to_be_checked = []
