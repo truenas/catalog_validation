@@ -1,3 +1,6 @@
+from collections import namedtuple
+
+CatalogItem = namedtuple('CatalogItem', 'train item version')
 common_mapping = {
     'required': bool,
     'null': bool,

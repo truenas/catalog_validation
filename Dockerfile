@@ -1,14 +1,22 @@
-FROM python:3.8.6-slim-buster
+FROM debian:testing
+
+RUN apt-get update
+
+RUN apt-get install -y \
+      debhelper-compat \
+      dh-python \
+      python3-dev \
+      python3-setuptools \
+      devscripts \
+      python3-semantic-version \
+      python3-kubernetes \
+      python3-yaml \
+      python3-pip
 
 ENV PYTHONUNBUFFERED 1
 ENV WORK_DIR /app
 RUN mkdir -p ${WORK_DIR}
 WORKDIR ${WORK_DIR}
-
-# install our app requirements
-ADD requirements.txt ${WORK_DIR}
-RUN pip install --disable-pip-version-check --exists-action w -r requirements.txt && \
-    rm -rf ~/.cache/pip /tmp/pip-build-root
 
 ADD . ${WORK_DIR}/
 RUN pip install -U .

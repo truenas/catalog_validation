@@ -1,6 +1,10 @@
 import errno
 
 
+class KubernetesSetupException(Exception):
+    pass
+
+
 class ValidationException(Exception):
     def __init__(self, error_msg, error_no=errno.EFAULT):
         self.errmsg = error_msg
