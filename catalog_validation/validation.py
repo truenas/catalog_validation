@@ -116,7 +116,9 @@ def validate_questions_yaml(questions_yaml_path, schema):
 
     verrors = ValidationErrors()
 
-    validate_key_value_types(questions_config, (('groups', list), ('questions', list)), verrors, schema)
+    validate_key_value_types(
+        questions_config, (('groups', list), ('questions', list), ('portals', list, False)), verrors, schema
+    )
 
     groups = []
     if type(questions_config.get('groups')) == list:
