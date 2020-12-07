@@ -173,7 +173,7 @@ def validate_question(question_data, schema, verrors, validate_top_level_attrs=N
             continue
         if value is None:
             continue
-        if type(value) != mapping[key]:
+        if not isinstance(value, mapping[key]):
             verrors.add(f'{schema}.schema.{key}', f'Expected {mapping[key].__name__!r} value type.')
 
     for condition, key, schema_str in (
