@@ -6,6 +6,7 @@ common_mapping = {
     'null': bool,
     'show_if': list,
     '$ref': list,
+    '$ui-ref': list,
     'subquestions': list,
     'show_subquestions_if': object,
     'type': str,
