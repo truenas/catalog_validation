@@ -75,7 +75,7 @@ def validate_key_value_types(data_to_check, mapping, verrors, schema):
         else:
             key, value_type, required = key_mapping
 
-        if key not in data_to_check:
+        if required and key not in data_to_check:
             verrors.add(f'{schema}.{key}', f'Missing required {key!r} key.')
         elif not isinstance(data_to_check[key], value_type):
             verrors.add(f'{schema}.{key}', f'{key!r} value should be a {value_type.__name__!r}')
