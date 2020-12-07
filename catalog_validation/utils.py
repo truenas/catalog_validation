@@ -7,8 +7,9 @@ common_mapping = {
     'show_if': list,
     '$ref': list,
     'subquestions': list,
-    'show_subquestions_if': str,
+    'show_subquestions_if': object,
     'type': str,
+    'editable': bool,
 }
 
 SCHEMA_MAPPING = {
@@ -48,6 +49,7 @@ SCHEMA_MAPPING = {
     'dict': {
         'default': dict,
         'attrs': list,
+        'additional_attrs': bool,
         **common_mapping,
     },
     'ipaddr': {
