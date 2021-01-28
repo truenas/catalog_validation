@@ -15,7 +15,7 @@ def validate_catalog(catalog_path):
 
     for file_dir in os.listdir(catalog_path):
         complete_path = os.path.join(catalog_path, file_dir)
-        if file_dir.startswith('.') or not os.path.isdir(complete_path):
+        if file_dir.startswith('.') or not os.path.isdir(complete_path) or file_dir == 'library':
             continue
 
         try:
