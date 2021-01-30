@@ -49,7 +49,7 @@ def deploy_charts(catalog_path, base_branch):
             [
                 'helm', 'install', chart_release_name, chart_path, '-n',
                 chart_release_name, '--create-namespace', '--wait',
-                '-f', os.path.join(chart_path, 'test_values.yaml'),
+                '-f', os.path.join(chart_path, 'test_values.yaml'), '--debug',
             ], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
         )
         stderr = cp.communicate(timeout=300)[1]
@@ -60,7 +60,7 @@ def deploy_charts(catalog_path, base_branch):
         print(f'[\033[94mINFO\x1B[0m]\tTesting {".".join(catalog_item)}')
         # We have deployed the chart release, now let's test it
         cp = subprocess.Popen(
-            ['helm', 'test', chart_release_name, '-n', chart_release_name],
+            ['helm', 'test', chart_release_name, '-n', chart_release_name, '--debug'],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env,
         )
         cp.communicate(timeout=300)
