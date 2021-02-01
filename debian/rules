@@ -5,13 +5,3 @@ export PYBUILD_NAME=catalog_validation
 
 %:
 	dh $@ --with python3 --buildsystem=pybuild
-
-override_dh_auto_install:
-	sh -c "\
-		mkdir -p debian/python3-catalog-validation/usr/sbin; \
-		curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 || exit 1; \
-		chmod 700 get_helm.sh || exit 1; \
-		export HELM_INSTALL_DIR=debian/python3-catalog-validation/usr/sbin; \
-		./get_helm.sh || exit 0; \
-	"
-	dh_auto_install;
