@@ -38,7 +38,7 @@ def validate_train(train_path):
     verrors.check()
 
 
-def validate_catalog_item(catalog_item_path, schema):
+def validate_catalog_item(catalog_item_path, schema, validate_versions=True):
     # We should ensure that each catalog item has at least 1 version available
     # Also that we have item.yaml present
     verrors = ValidationErrors()
@@ -63,7 +63,7 @@ def validate_catalog_item(catalog_item_path, schema):
 
         validate_key_value_types(item_config, (('categories', list),), verrors, f'{schema}.item_config')
 
-    for version_path in versions:
+    for version_path in (versions if validate_versions else []):
         try:
             validate_catalog_item_version(version_path, f'{schema}.versions.{os.path.basename(version_path)}')
         except ValidationErrors as e:
