@@ -11,6 +11,7 @@ common_mapping = {
     'show_subquestions_if': object,
     'type': str,
     'editable': bool,
+    'hidden': bool,
 }
 
 SCHEMA_MAPPING = {
