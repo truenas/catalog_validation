@@ -66,7 +66,7 @@ SCHEMA_MAPPING = {
         **common_mapping,
     }
 }
-WANTED_FILES_IN_ITEM_VERSION = {'questions.yaml', 'app-readme.md', 'values.yaml', 'Chart.yaml', 'README.md'}
+WANTED_FILES_IN_ITEM_VERSION = {'questions.yaml', 'app-readme.md', 'Chart.yaml', 'README.md'}
 
 
 def validate_key_value_types(data_to_check, mapping, verrors, schema):
