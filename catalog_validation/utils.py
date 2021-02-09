@@ -1,3 +1,5 @@
+import re
+
 from collections import namedtuple
 
 CatalogItem = namedtuple('CatalogItem', 'train item version')
@@ -66,6 +68,7 @@ SCHEMA_MAPPING = {
         **common_mapping,
     }
 }
+VALID_TRAIN_REGEX = re.compile(r'^\w+[\w.-]*$')
 WANTED_FILES_IN_ITEM_VERSION = {'questions.yaml', 'app-readme.md', 'Chart.yaml', 'README.md'}
 
 

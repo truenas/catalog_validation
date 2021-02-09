@@ -4,7 +4,7 @@ import yaml
 from semantic_version import Version
 
 from .exceptions import CatalogDoesNotExist, ValidationErrors
-from .utils import SCHEMA_MAPPING, validate_key_value_types, WANTED_FILES_IN_ITEM_VERSION
+from .utils import SCHEMA_MAPPING, validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
 
 
 def validate_catalog(catalog_path):
@@ -29,6 +29,11 @@ def validate_catalog(catalog_path):
 def validate_train(train_path):
     train = os.path.basename(train_path)
     verrors = ValidationErrors()
+    if not VALID_TRAIN_REGEX.match(train):
+        verrors.add(train, 'Train name is invalid.')
+
+    verrors.check()
+
     for catalog_item in os.listdir(train_path):
         try:
             validate_catalog_item(os.path.join(train_path, catalog_item), f'{train}.{catalog_item}')
