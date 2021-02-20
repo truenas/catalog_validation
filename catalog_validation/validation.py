@@ -1,10 +1,12 @@
 import os
 import yaml
 
+from jsonschema import validate as json_schema_validate
+from jsonschema.exceptions import ValidationError as JsonValidationError
 from semantic_version import Version
 
 from .exceptions import CatalogDoesNotExist, ValidationErrors
-from .utils import SCHEMA_MAPPING, validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
+from .utils import SCHEMA_JSON_MAPPING, validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
 
 
 def validate_catalog(catalog_path):
@@ -183,19 +185,16 @@ def validate_question(question_data, schema, verrors, validate_top_level_attrs=N
         return
 
     variable_type = schema_data['type']
-    if variable_type not in SCHEMA_MAPPING:
+    if variable_type not in SCHEMA_JSON_MAPPING:
         verrors.add(f'{schema}.schema.type', 'Invalid schema type specified.')
         return
 
-    mapping = SCHEMA_MAPPING[variable_type]
-    for key, value in schema_data.items():
-        if key not in mapping:
-            verrors.add(f'{schema}.schema', f'{key!r} not allowed with {variable_type!r} variable schema.')
-            continue
-        if value is None:
-            continue
-        if not isinstance(value, mapping[key]):
-            verrors.add(f'{schema}.schema.{key}', f'Expected {mapping[key].__name__!r} value type.')
+    mapping = SCHEMA_JSON_MAPPING[variable_type]
+    try:
+        json_schema_validate(instance=schema_data, schema=mapping)
+    except JsonValidationError as e:
+        print(schema_data)
+        verrors.add(f'{schema}.schema', f'Following errors were encountered when validating schema: {e!r}')
 
     for condition, key, schema_str in (
         (variable_type != 'list', 'subquestions', f'{schema}.schema.subquestions'),

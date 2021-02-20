@@ -23,26 +23,19 @@ common_schema = {
         'type': 'array',
     },
     'show_subquestions_if': {
-        'type': {
-            'anyOf': [
-                {'type': 'string'},
-                {'type': 'integer'},
-                {'type': 'boolean'},
-                {'type': 'object'},
-                {'type': 'array'},
-            ],
-            'nullable': True,
-        }
+        'type': ['string', 'integer', 'boolean', 'object', 'array', 'null'],
+
     },
     'type': {
         'type': 'string',
+        '_required_': True,
     },
     'editable': {
         'type': 'boolean',
     },
     'hidden': {
         'type': 'boolean',
-    }
+    },
 }
 SCHEMA_JSON_MAPPING = {
     'string': {
@@ -62,8 +55,8 @@ SCHEMA_JSON_MAPPING = {
                 'items': [{
                     'type': 'object',
                     'properties': {
-                        'value': {'type': ['string', 'integer', 'null'], 'required': True},
-                        'description': {'type': ['string', 'null'], 'required': True},
+                        'value': {'type': ['string', 'integer', 'null'], '_required_': True},
+                        'description': {'type': ['string', 'null'], '_required_': True},
                     },
                     'additionalProperties': False,
                 }]
@@ -95,8 +88,8 @@ SCHEMA_JSON_MAPPING = {
                 'items': [{
                     'type': 'object',
                     'properties': {
-                        'value': {'type': ['integer', 'null'], 'required': True},
-                        'description': {'type': ['string', 'null'], 'required': True},
+                        'value': {'type': ['integer', 'null'], '_required_': True},
+                        'description': {'type': ['string', 'null'], '_required_': True},
                     },
                     'additionalProperties': False,
                 }]
@@ -143,7 +136,7 @@ SCHEMA_JSON_MAPPING = {
             },
             'items': {
                 'type': 'array',
-                'required': True,
+                '_required_': True,
             },
             **{k: v for k, v in common_schema.items() if k not in ('subquestions', 'show_subquestions_if')},
         },
@@ -157,7 +150,7 @@ SCHEMA_JSON_MAPPING = {
             },
             'attrs': {
                 'type': 'array',
-                'required': True,
+                '_required_': True,
             },
             'additional_attrs': {
                 'type': 'boolean',
@@ -190,7 +183,8 @@ SCHEMA_JSON_MAPPING = {
         'properties': {
             'default': {
                 'type': 'object',
-            }
+            },
+            **common_schema,
         },
         'additionalProperties': False,
     },
