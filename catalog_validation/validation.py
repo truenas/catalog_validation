@@ -193,7 +193,6 @@ def validate_question(question_data, schema, verrors, validate_top_level_attrs=N
     try:
         json_schema_validate(instance=schema_data, schema=mapping)
     except JsonValidationError as e:
-        print(schema_data)
         verrors.add(f'{schema}.schema', f'Following errors were encountered when validating schema: {e!r}')
 
     for condition, key, schema_str in (
