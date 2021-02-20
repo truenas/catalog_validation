@@ -1,3 +1,5 @@
-semantic_version
-pyyaml
+jsonschema
 kubernetes
+pyyaml
+requests
+semantic_version
