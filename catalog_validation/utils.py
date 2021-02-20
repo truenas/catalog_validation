@@ -3,6 +3,198 @@ import re
 from collections import namedtuple
 
 CatalogItem = namedtuple('CatalogItem', 'train item version')
+common_schema = {
+    'required': {
+        'type': 'boolean',
+    },
+    'null': {
+        'type': 'boolean',
+    },
+    'show_if': {
+        'type': 'array',
+    },
+    '$ref': {
+        'type': 'array',
+    },
+    '$ui-ref': {
+        'type': 'array',
+    },
+    'subquestions': {
+        'type': 'array',
+    },
+    'show_subquestions_if': {
+        'type': {
+            'anyOf': [
+                {'type': 'string'},
+                {'type': 'integer'},
+                {'type': 'boolean'},
+                {'type': 'object'},
+                {'type': 'array'},
+            ],
+            'nullable': True,
+        }
+    },
+    'type': {
+        'type': 'string',
+    },
+    'editable': {
+        'type': 'boolean',
+    },
+    'hidden': {
+        'type': 'boolean',
+    }
+}
+SCHEMA_JSON_MAPPING = {
+    'string': {
+        'type': 'object',
+        'properties': {
+            'default': {
+                'type': 'string',
+            },
+            'min_length': {
+                'type': 'integer',
+            },
+            'max_length': {
+                'type': 'integer',
+            },
+            'enum': {
+                'type': 'array',
+                'items': [{
+                    'type': 'object',
+                    'properties': {
+                        'value': {'type': ['string', 'integer', 'null'], 'required': True},
+                        'description': {'type': ['string', 'null'], 'required': True},
+                    },
+                    'additionalProperties': False,
+                }]
+            },
+            'private': {
+                'type': 'boolean',
+            },
+            'valid_chars': {
+                'type': 'string',
+            },
+            **common_schema
+        },
+        'additionalProperties': False,
+    },
+    'int': {
+        'type': 'object',
+        'properties': {
+            'default': {
+                'type': 'integer',  # TODO: Add conditional schema for null
+            },
+            'min': {
+                'type': 'integer',
+            },
+            'max': {
+                'type': 'integer',
+            },
+            'enum': {
+                'type': 'array',
+                'items': [{
+                    'type': 'object',
+                    'properties': {
+                        'value': {'type': ['integer', 'null'], 'required': True},
+                        'description': {'type': ['string', 'null'], 'required': True},
+                    },
+                    'additionalProperties': False,
+                }]
+            },
+            **common_schema,
+        },
+        'additionalProperties': False,
+    },
+    'boolean': {
+        'type': 'object',
+        'properties': {
+            'default': {
+                'type': 'boolean',
+            },
+            **common_schema,
+        },
+        'additionalProperties': False,
+    },
+    'path': {
+        'type': 'object',
+        'properties': {
+            'default': {
+                'type': 'string',
+            },
+            **common_schema,
+        },
+        'additionalProperties': False,
+    },
+    'hostpath': {
+        'type': 'object',
+        'properties': {
+            'default': {
+                'type': 'string',
+            },
+            **common_schema,
+        },
+        'additionalProperties': False,
+    },
+    'list': {
+        'type': 'object',
+        'properties': {
+            'default': {
+                'type': 'array',
+            },
+            'items': {
+                'type': 'array',
+                'required': True,
+            },
+            **{k: v for k, v in common_schema.items() if k not in ('subquestions', 'show_subquestions_if')},
+        },
+        'additionalProperties': False,
+    },
+    'dict': {
+        'type': 'object',
+        'properties': {
+            'default': {
+                'type': 'object',
+            },
+            'attrs': {
+                'type': 'array',
+                'required': True,
+            },
+            'additional_attrs': {
+                'type': 'boolean',
+            },
+            **common_schema,
+        },
+        'additionalProperties': False,
+    },
+    'ipaddr': {
+        'type': 'object',
+        'properties': {
+            'default': {
+                'type': 'string',
+            },
+            'ipv4': {
+                'type': 'boolean',
+            },
+            'ipv6': {
+                'type': 'boolean',
+            },
+            'cidr': {
+                'type': 'boolean',
+            },
+            **common_schema,
+        },
+        'additionalProperties': False,
+    },
+    'cron': {
+        'type': 'object',
+        'properties': {
+            'default': {
+                'type': 'object',
+            }
+        },
+        'additionalProperties': False,
+    },
+}
 common_mapping = {
     'required': bool,
     'null': bool,
