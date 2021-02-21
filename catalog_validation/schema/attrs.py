@@ -124,14 +124,14 @@ class CertificateAuthorityFeature(Feature):
 
 
 FEATURES = [
-    IXVolumeFeature,
-    DefinitionInterfaceFeature,
-    DefinitionGPUConfigurationFeature,
-    DefinitionTimezoneFeature,
-    DefinitionNodeIPFeature,
-    ValidationNodePortFeature,
-    CertificateFeature,
-    CertificateAuthorityFeature,
+    IXVolumeFeature(),
+    DefinitionInterfaceFeature(),
+    DefinitionGPUConfigurationFeature(),
+    DefinitionTimezoneFeature(),
+    DefinitionNodeIPFeature(),
+    ValidationNodePortFeature(),
+    CertificateFeature(),
+    CertificateAuthorityFeature(),
 ]
 
 
@@ -151,7 +151,7 @@ class Schema:
     def initialize_values(self, data):
         self._schema_data = data
         for key, value in filter(
-            lambda k, v: hasattr(self, k) and k not in self._skip_data_values, data.items()
+            lambda k: hasattr(self, k[0]) and k[0] not in self._skip_data_values, data.items()
         ):
             setattr(self, key, value)
 
@@ -179,9 +179,8 @@ class Schema:
             for index, ref in enumerate(self._schema_data['$ref']):
                 if ref not in FEATURES:
                     continue
-
                 try:
-                    FEATURES[FEATURES.index(ref)]().validate(self, f'{schema}.$ref.{index}')
+                    FEATURES[FEATURES.index(ref)].validate(self, f'{schema}.$ref.{index}')
                 except ValidationErrors as e:
                     verrors.extend(e)
 
@@ -258,7 +257,25 @@ class Variable:
         if isinstance(schema, dict):
             s_type = schema.get('type')
             if s_type == 'boolean':
-                self.schema = BooleanSchema(data=schema)
+                self.schema = BooleanSchema
+            elif s_type == 'string':
+                self.schema = StringSchema
+            elif s_type == 'int':
+                self.schema = IntegerSchema
+            elif s_type == 'path':
+                self.schema = PathSchema
+            elif s_type == 'hostpath':
+                self.schema = HostPathSchema
+            elif s_type == 'list':
+                self.schema = ListSchema
+            elif s_type == 'dict':
+                self.schema = DictSchema
+            elif s_type == 'ipaddr':
+                self.schema = IPAddrSchema
+            elif s_type == 'cron':
+                self.schema = CronSchema
+            if self.schema:
+                self.schema = self.schema(data=schema)
 
     def validate(self, schema):
         verrors = ValidationErrors()
@@ -268,7 +285,12 @@ class Variable:
         if not self.schema:
             verrors.add(f'{schema}.schema', 'Schema must be specified for variable')
         else:
-            self.schema.validate(f'{schema}.schema')
+            try:
+                self.schema.validate(f'{schema}.schema')
+            except ValidationErrors as ve:
+                verrors.extend(ve)
+
+        verrors.check()
 
     def __eq__(self, other):
         return (other if isinstance(other, str) else other.name) == self.name
