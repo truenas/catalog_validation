@@ -67,6 +67,17 @@ def deploy_charts(catalog_path, base_branch):
         if cp.returncode:
             failures.append(f'Helm test failed for {".".join(catalog_item)}')
 
+        print(f'[\033[94mINFO\x1B[0m]\tRemoving {".".join(catalog_item)}')
+        # We have deployed and tested the chart release, now let's remove it
+        # This prevents resource consumption issues when testing lots of releases
+        cp = subprocess.Popen(
+            ['helm', 'uninstall', chart_release_name, '-n', chart_release_name, '--debug'],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env,
+        )
+        cp.communicate(timeout=300)
+        if cp.returncode:
+            failures.append(f'Helm Uninstall failed for {".".join(catalog_item)}')
+
     if not failures:
         print('[\033[92mOK\x1B[0m]\tTests passed successfully')
         exit(0)
