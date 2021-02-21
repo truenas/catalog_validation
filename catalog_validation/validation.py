@@ -1,13 +1,11 @@
 import os
 import yaml
 
-from jsonschema import validate as json_schema_validate
-from jsonschema.exceptions import ValidationError as JsonValidationError
 from semantic_version import Version
 
 from catalog_validation.schema.attrs import Variable
 from .exceptions import CatalogDoesNotExist, ValidationErrors
-from .utils import SCHEMA_JSON_MAPPING, validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
+from .utils import validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
 
 
 def validate_catalog(catalog_path):
