@@ -1,5 +1,4 @@
 jsonschema
 kubernetes
 pyyaml
-requests
 semantic_version
