@@ -1,5 +1,3 @@
-from jsonschema import validate as json_schema_validate, ValidationError as JsonValidationError
-
 from catalog_validation.exceptions import ValidationErrors
 
 from .schema_gen import DictSchema, IntegerSchema, StringSchema
@@ -50,23 +48,30 @@ class IXVolumeFeature(Feature):
         if 'properties' in attrs:
             index = attrs.index('properties')
             properties = attrs[index]
-            try:
-                json_schema_validate(
-                    properties.schema._schema_data, {
-                        'type': 'object',
-                        'properties': {
-                            'recordsize': {
-                                'type': 'string',
-                                'enum': [
-                                    '512', '1K', '2K', '4K', '8K', '16K', '32K', '64K', '128K', '256K', '512K', '1024K'
-                                ]
-                            }
-                        },
-                        'additionalProperties': False,
-                    }
+            properties_schema = properties.schema
+            supported_props = {
+                'recordsize': {
+                    'valid_schema_type': [StringSchema],
+                },
+            }
+            not_supported = set([str(v) for v in properties_schema.attrs]) - set(supported_props)
+            if not_supported:
+                verrors.add(
+                    f'{schema_str}.attrs.{index}.attrs', f'{", ".join(not_supported)} properties are not supported'
                 )
-            except JsonValidationError as e:
-                verrors.add(f'{schema_str}.attrs.{index}.properties', f'Error validating properties: {e}')
+
+            for prop_index, prop in enumerate(properties_schema.attrs):
+                if prop.name not in supported_props:
+                    continue
+
+                prop_schema = prop.schema
+                check_prop = supported_props[prop.name]
+                if not isinstance(prop_schema, tuple(check_prop['valid_schema_type'])):
+                    verrors.add(
+                        f'{schema_str}.attrs.{index}.attrs.{prop_index}',
+                        f'{prop.name!r} must be of '
+                        f'{", ".join([str(s) for s in check_prop["valid_schema_type"]])} type(s)'
+                    )
 
 
 class NormalizeInterfaceConfiguration(Feature):

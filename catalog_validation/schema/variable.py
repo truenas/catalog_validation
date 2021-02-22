@@ -30,5 +30,8 @@ class Variable:
 
         verrors.check()
 
+    def __str__(self):
+        return self.name
+
     def __eq__(self, other):
         return (other if isinstance(other, str) else other.name) == self.name
