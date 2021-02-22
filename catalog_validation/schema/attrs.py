@@ -2,137 +2,8 @@ from jsonschema import validate as json_schema_validate, ValidationError as Json
 
 from catalog_validation.exceptions import ValidationErrors
 
-
-class Feature:
-
-    NAME = NotImplementedError
-
-    def validate(self, schema_obj, schema_str):
-        verrors = ValidationErrors()
-        self._validate(verrors, schema_obj, schema_str)
-        verrors.check()
-
-    def _validate(self, verrors, schema_obj, schema_str):
-        raise NotImplementedError
-
-    def __eq__(self, other):
-        return self.NAME == (other if isinstance(other, str) else other.NAME)
-
-
-class IXVolumeFeature(Feature):
-
-    NAME = 'normalize/ixVolume'
-
-    def _validate(self, verrors, schema_obj, schema_str):
-        if not isinstance(schema_obj, (StringSchema, DictSchema)):
-            verrors.add(f'{schema_str}.type', 'Schema must be of string/dictionary type')
-
-        verrors.check()
-
-        if isinstance(schema_obj, StringSchema):
-            return
-
-        attrs = schema_obj.attrs
-        if 'datasetName' not in attrs:
-            verrors.add(f'{schema_str}.attrs', 'Variable "datasetName" must be specified.')
-        elif not isinstance(attrs[attrs.index('datasetName')].schema, StringSchema):
-            verrors.add(f'{schema_str}.attrs', 'Variable "datasetName" must be of string type.')
-
-        if 'properties' in attrs:
-            index = attrs.index('properties')
-            properties = attrs[index]
-            try:
-                json_schema_validate(
-                    properties.schema._schema_data, {
-                        'type': 'object',
-                        'properties': {
-                            'recordsize': {
-                                'type': 'string',
-                                'enum': [
-                                    '512', '1K', '2K', '4K', '8K', '16K', '32K', '64K', '128K', '256K', '512K', '1024K'
-                                ]
-                            }
-                        },
-                        'additionalProperties': False,
-                    }
-                )
-            except JsonValidationError as e:
-                verrors.add(f'{schema_str}.attrs.{index}.properties', f'Error validating properties: {e}')
-
-
-class DefinitionInterfaceFeature(Feature):
-
-    NAME = 'definitions/interface'
-
-    def _validate(self, verrors, schema_obj, schema_str):
-        if not isinstance(schema_obj, StringSchema):
-            verrors.add(schema_str, 'Schema type must be String.')
-
-
-class DefinitionGPUConfigurationFeature(Feature):
-
-    NAME = 'definitions/gpuConfiguration'
-
-    def _validate(self, verrors, schema_obj, schema_str):
-        if not isinstance(schema_obj, DictSchema):
-            verrors.add(schema_str, 'Schema type must be Dict.')
-
-
-class DefinitionTimezoneFeature(Feature):
-
-    NAME = 'definitions/timezone'
-
-    def _validate(self, verrors, schema_obj, schema_str):
-        if not isinstance(schema_obj, StringSchema):
-            verrors.add(schema_str, 'Schema type must be String.')
-
-
-class DefinitionNodeIPFeature(Feature):
-
-    NAME = 'definitions/nodeIP'
-
-    def _validate(self, verrors, schema_obj, schema_str):
-        if not isinstance(schema_obj, StringSchema):
-            verrors.add(schema_str, 'Schema type must be String.')
-
-
-class ValidationNodePortFeature(Feature):
-
-    NAME = 'validations/nodePort'
-
-    def _validate(self, verrors, schema_obj, schema_str):
-        if not isinstance(schema_obj, IntegerSchema):
-            verrors.add(schema_str, 'Schema type must be Integer.')
-
-
-class CertificateFeature(Feature):
-
-    NAME = 'definitions/certificate'
-
-    def _validate(self, verrors, schema_obj, schema_str):
-        if not isinstance(schema_obj, IntegerSchema):
-            verrors.add(schema_str, 'Schema type must be Integer.')
-
-
-class CertificateAuthorityFeature(Feature):
-
-    NAME = 'definitions/certificateAuthority'
-
-    def _validate(self, verrors, schema_obj, schema_str):
-        if not isinstance(schema_obj, IntegerSchema):
-            verrors.add(schema_str, 'Schema type must be Integer.')
-
-
-FEATURES = [
-    IXVolumeFeature(),
-    DefinitionInterfaceFeature(),
-    DefinitionGPUConfigurationFeature(),
-    DefinitionTimezoneFeature(),
-    DefinitionNodeIPFeature(),
-    ValidationNodePortFeature(),
-    CertificateFeature(),
-    CertificateAuthorityFeature(),
-]
+from .feature_gen import get_feature
+from .variable_gen import generate_variable
 
 
 class Schema:
@@ -177,10 +48,11 @@ class Schema:
 
         if '$ref' in self._schema_data:
             for index, ref in enumerate(self._schema_data['$ref']):
-                if ref not in FEATURES:
+                feature_obj = get_feature(ref)
+                if not feature_obj:
                     continue
                 try:
-                    FEATURES[FEATURES.index(ref)].validate(self, f'{schema}.$ref.{index}')
+                    feature_obj.validate(self, f'{schema}.$ref.{index}')
                 except ValidationErrors as e:
                     verrors.extend(e)
 
@@ -210,7 +82,6 @@ class Schema:
                 },
                 'show_subquestions_if': {
                     'type': ['string', 'integer', 'boolean', 'object', 'array', 'null'],
-
                 },
                 'type': {
                     'type': 'string',
@@ -241,59 +112,6 @@ class Schema:
                 }]
             }
         return schema
-
-
-class Variable:
-    def __init__(self, data):
-        self.name = self.label = self.description = self.group = None
-        self.schema = None
-        self.update_from_data(data)
-
-    def update_from_data(self, data):
-        self.name = data.get('variable')
-        self.label = data.get('label')
-        self.description = data.get('description')
-        schema = data.get('schema')
-        if isinstance(schema, dict):
-            s_type = schema.get('type')
-            if s_type == 'boolean':
-                self.schema = BooleanSchema
-            elif s_type == 'string':
-                self.schema = StringSchema
-            elif s_type == 'int':
-                self.schema = IntegerSchema
-            elif s_type == 'path':
-                self.schema = PathSchema
-            elif s_type == 'hostpath':
-                self.schema = HostPathSchema
-            elif s_type == 'list':
-                self.schema = ListSchema
-            elif s_type == 'dict':
-                self.schema = DictSchema
-            elif s_type == 'ipaddr':
-                self.schema = IPAddrSchema
-            elif s_type == 'cron':
-                self.schema = CronSchema
-            if self.schema:
-                self.schema = self.schema(data=schema)
-
-    def validate(self, schema):
-        verrors = ValidationErrors()
-        if not self.name:
-            verrors.add(f'{schema}.variable', 'Variable value must be specified')
-
-        if not self.schema:
-            verrors.add(f'{schema}.schema', 'Schema must be specified for variable')
-        else:
-            try:
-                self.schema.validate(f'{schema}.schema')
-            except ValidationErrors as ve:
-                verrors.extend(ve)
-
-        verrors.check()
-
-    def __eq__(self, other):
-        return (other if isinstance(other, str) else other.name) == self.name
 
 
 class BooleanSchema(Schema):
@@ -386,7 +204,7 @@ class DictSchema(Schema):
 
     def initialize_values(self, data):
         super().initialize_values(data)
-        self.attrs = [Variable(d) for d in (data.get('attrs') or [])]
+        self.attrs = [generate_variable(d) for d in (data.get('attrs') or [])]
 
     def json_schema(self):
         schema = super().json_schema()
@@ -409,7 +227,7 @@ class ListSchema(Schema):
 
     def initialize_values(self, data):
         super().initialize_values(data)
-        self.items = [Variable(d) for d in (data.get('items') or [])]
+        self.items = [generate_variable(d) for d in (data.get('items') or [])]
 
     def json_schema(self):
         schema = super().json_schema()
