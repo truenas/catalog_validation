@@ -69,6 +69,11 @@ class IXVolumeFeature(Feature):
                 verrors.add(f'{schema_str}.attrs.{index}.properties', f'Error validating properties: {e}')
 
 
+class NormalizeInterfaceConfiguration(Feature):
+    NAME = 'normalize/interfaceConfiguration'
+    VALID_SCHEMAS = [DictSchema]
+
+
 class DefinitionInterfaceFeature(Feature):
 
     NAME = 'definitions/interface'
