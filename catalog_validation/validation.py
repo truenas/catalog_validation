@@ -3,8 +3,9 @@ import yaml
 
 from semantic_version import Version
 
+from catalog_validation.schema.variable import Variable
 from .exceptions import CatalogDoesNotExist, ValidationErrors
-from .utils import SCHEMA_MAPPING, validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
+from .utils import validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
 
 
 def validate_catalog(catalog_path):
@@ -176,26 +177,14 @@ def validate_question(question_data, schema, verrors, validate_top_level_attrs=N
     if type(question_data.get('schema')) != dict:
         return
 
+    try:
+        Variable(question_data).validate(schema)
+    except ValidationErrors as ve:
+        verrors.extend(ve)
+        return
+
     schema_data = question_data['schema']
-    validate_key_value_types(schema_data, (('type', str),), verrors, f'{schema}.schema')
-
-    if type(schema_data.get('type')) != str:
-        return
-
     variable_type = schema_data['type']
-    if variable_type not in SCHEMA_MAPPING:
-        verrors.add(f'{schema}.schema.type', 'Invalid schema type specified.')
-        return
-
-    mapping = SCHEMA_MAPPING[variable_type]
-    for key, value in schema_data.items():
-        if key not in mapping:
-            verrors.add(f'{schema}.schema', f'{key!r} not allowed with {variable_type!r} variable schema.')
-            continue
-        if value is None:
-            continue
-        if not isinstance(value, mapping[key]):
-            verrors.add(f'{schema}.schema.{key}', f'Expected {mapping[key].__name__!r} value type.')
 
     for condition, key, schema_str in (
         (variable_type != 'list', 'subquestions', f'{schema}.schema.subquestions'),

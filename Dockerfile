@@ -8,6 +8,7 @@ RUN apt-get install -y \
       python3-dev \
       python3-setuptools \
       devscripts \
+      python3-jsonschema \
       python3-semantic-version \
       python3-kubernetes \
       python3-yaml \

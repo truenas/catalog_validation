@@ -5,6 +5,7 @@ Maintainer: Waqar Ahmed <waqar@ixsystems.com>
 Build-Depends: debhelper-compat (= 12),
                dh-python,
                python3-dev,
+               python3-jsonschema,
                python3-semantic-version,
                python3-kubernetes,
                python3-yaml,
@@ -16,6 +17,7 @@ Testsuite: autopkgtest-pkg-python
 Package: python3-catalog-validation
 Architecture: any
 Depends: python3-semantic-version,
+         python3-jsonschema,
          python3-kubernetes,
          python3-yaml,
          ${shlibs:Depends},
