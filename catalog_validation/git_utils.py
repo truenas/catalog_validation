@@ -15,7 +15,7 @@ def get_affected_catalog_items_with_versions(catalog_path, base_branch='master')
     )
     items_to_be_checked = []
     for file_path in filter(bool, map(str.strip, cp.stdout.decode().split('\n'))):
-        if file_path.startswith(('.', 'library/')):
+        if file_path.startswith(('.', 'library/', 'docs/')):
             continue
         # Any file not being under a version directory is of no use to us and we can skip it as it's not enough
         # for us to test the catalog item in question
