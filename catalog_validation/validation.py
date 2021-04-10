@@ -36,8 +36,11 @@ def validate_train(train_path):
     verrors.check()
 
     for catalog_item in os.listdir(train_path):
+        catalog_item_path = os.path.join(train_path, catalog_item)
+        if catalog_item.startswith('.') or not os.path.isdir(catalog_item_path):
+            continue
         try:
-            validate_catalog_item(os.path.join(train_path, catalog_item), f'{train}.{catalog_item}')
+            validate_catalog_item(catalog_item_path, f'{train}.{catalog_item}')
         except ValidationErrors as e:
             verrors.extend(e)
 
