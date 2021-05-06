@@ -89,6 +89,9 @@ class Schema:
                 'editable': {
                     'type': 'boolean',
                 },
+                'immutable': {
+                    'type': 'boolean',
+                },
                 'hidden': {
                     'type': 'boolean',
                 },
