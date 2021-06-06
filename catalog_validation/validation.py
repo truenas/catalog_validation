@@ -36,8 +36,11 @@ def validate_train(train_path):
     verrors.check()
 
     for catalog_item in os.listdir(train_path):
+        item_path = os.path.join(train_path, catalog_item)
+        if not os.path.isdir(item_path):
+            continue
         try:
-            validate_catalog_item(os.path.join(train_path, catalog_item), f'{train}.{catalog_item}')
+            validate_catalog_item(item_path, f'{train}.{catalog_item}')
         except ValidationErrors as e:
             verrors.extend(e)
 
@@ -51,6 +54,11 @@ def validate_catalog_item(catalog_item_path, schema, validate_versions=True):
     item_name = os.path.join(catalog_item_path)
     files = []
     versions = []
+
+    if not os.path.isdir(catalog_item_path):
+        verrors.add(schema, 'Catalog item must be a directory')
+    verrors.check()
+
     for file_dir in os.listdir(catalog_item_path):
         complete_path = os.path.join(catalog_item_path, file_dir)
         if os.path.isdir(complete_path):
