@@ -129,6 +129,9 @@ def validate_questions_yaml(questions_yaml_path, schema):
         questions_config = yaml.safe_load(f.read())
 
     verrors = ValidationErrors()
+    if not isinstance(questions_config, dict):
+        verrors.add(schema, 'Must be a dictionary')
+        verrors.check()
 
     validate_key_value_types(
         questions_config, (('groups', list), ('questions', list), ('portals', dict, False)), verrors, schema
