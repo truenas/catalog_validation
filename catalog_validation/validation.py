@@ -104,18 +104,22 @@ def validate_catalog_item_version(version_path, schema):
     chart_version_path = os.path.join(version_path, 'Chart.yaml')
     if os.path.exists(chart_version_path):
         with open(chart_version_path, 'r') as f:
-            chart_config = yaml.safe_load(f.read())
+            try:
+                chart_config = yaml.safe_load(f.read())
+            except yaml.YAMLError:
+                verrors.add(schema, 'Must be a valid yaml file')
+            else:
+                if not isinstance(chart_config, dict):
+                    verrors.add(schema, 'Must be a dictionary')
+                else:
+                    if chart_config.get('name') != item_name:
+                        verrors.add(f'{schema}.item_name', 'Item name not correctly set in "Chart.yaml".')
 
-        if not isinstance(chart_config, dict):
-            verrors.add(schema, 'Must be a dictionary')
-        else:
-            if chart_config.get('name') != item_name:
-                verrors.add(f'{schema}.item_name', 'Item name not correctly set in "Chart.yaml".')
-
-            if chart_config.get('version') != version_name:
-                verrors.add(
-                    f'{schema}.version', 'Configured version in "Chart.yaml" does not match version directory name.'
-                )
+                    if chart_config.get('version') != version_name:
+                        verrors.add(
+                            f'{schema}.version',
+                            'Configured version in "Chart.yaml" does not match version directory name.'
+                        )
 
     questions_path = os.path.join(version_path, 'questions.yaml')
     if os.path.exists(questions_path):
@@ -128,13 +132,18 @@ def validate_catalog_item_version(version_path, schema):
 
 
 def validate_questions_yaml(questions_yaml_path, schema):
-    with open(questions_yaml_path, 'r') as f:
-        questions_config = yaml.safe_load(f.read())
-
     verrors = ValidationErrors()
-    if not isinstance(questions_config, dict):
-        verrors.add(schema, 'Must be a dictionary')
-        verrors.check()
+
+    with open(questions_yaml_path, 'r') as f:
+        try:
+            questions_config = yaml.safe_load(f.read())
+        except yaml.YAMLError:
+            verrors.add(schema, 'Must be a valid yaml file')
+        else:
+            if not isinstance(questions_config, dict):
+                verrors.add(schema, 'Must be a dictionary')
+
+    verrors.check()
 
     validate_key_value_types(
         questions_config, (('groups', list), ('questions', list), ('portals', dict, False)), verrors, schema
