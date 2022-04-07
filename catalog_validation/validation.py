@@ -1,3 +1,4 @@
+import concurrent.futures
 import os
 import yaml
 
@@ -13,21 +14,33 @@ def validate_catalog(catalog_path):
         raise CatalogDoesNotExist(catalog_path)
 
     verrors = ValidationErrors()
-
+    items = []
+    item_futures = []
     for file_dir in os.listdir(catalog_path):
         complete_path = os.path.join(catalog_path, file_dir)
         if file_dir.startswith('.') or not os.path.isdir(complete_path) or file_dir in ('library', 'docs'):
             continue
-
         try:
-            validate_train(complete_path)
+            validate_train_structure(complete_path)
         except ValidationErrors as e:
             verrors.extend(e)
+        else:
+            items.extend(get_train_items(complete_path))
+
+    with concurrent.futures.ProcessPoolExecutor(max_workers=5 if len(items) > 10 else 2) as exc:
+        for item in items:
+            item_futures.append(exc.submit(validate_catalog_item, item[0], item[1]))
+
+        for future in item_futures:
+            try:
+                future.result()
+            except ValidationErrors as e:
+                verrors.extend(e)
 
     verrors.check()
 
 
-def validate_train(train_path):
+def validate_train_structure(train_path):
     train = os.path.basename(train_path)
     verrors = ValidationErrors()
     if not VALID_TRAIN_REGEX.match(train):
@@ -35,16 +48,16 @@ def validate_train(train_path):
 
     verrors.check()
 
+
+def get_train_items(train_path):
+    train = os.path.basename(train_path)
+    items = []
     for catalog_item in os.listdir(train_path):
         item_path = os.path.join(train_path, catalog_item)
         if not os.path.isdir(item_path):
             continue
-        try:
-            validate_catalog_item(item_path, f'{train}.{catalog_item}')
-        except ValidationErrors as e:
-            verrors.extend(e)
-
-    verrors.check()
+        items.append((item_path, f'{train}.{catalog_item}'))
+    return items
 
 
 def validate_catalog_item(catalog_item_path, schema, validate_versions=True):
