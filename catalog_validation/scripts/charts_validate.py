@@ -61,11 +61,11 @@ def deploy_charts(catalog_path, base_branch):
         # We have deployed the chart release, now let's test it
         cp = subprocess.Popen(
             ['helm', 'test', chart_release_name, '-n', chart_release_name, '--debug'],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env,
         )
-        cp.communicate(timeout=300)
+        err = cp.communicate(timeout=300)[0]
         if cp.returncode:
-            failures.append(f'Helm test failed for {".".join(catalog_item)}')
+            failures.append(f'Helm test failed for {".".join(catalog_item)}: {err.decode(errors="ignore")}')
 
         print(f'[\033[94mINFO\x1B[0m]\tRemoving {".".join(catalog_item)}')
         # We have deployed and tested the chart release, now let's remove it
