@@ -49,7 +49,7 @@ def deploy_charts(catalog_path, base_branch):
             [
                 'helm', 'install', chart_release_name, chart_path, '-n',
                 chart_release_name, '--create-namespace', '--wait',
-                '-f', os.path.join(chart_path, 'test_values.yaml'), '--debug', '--timeout', '600'
+                '-f', os.path.join(chart_path, 'test_values.yaml'), '--debug', '--timeout', '600s'
             ], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
         )
         stderr = cp.communicate(timeout=300)[1]
