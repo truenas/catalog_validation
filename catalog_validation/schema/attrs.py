@@ -175,6 +175,10 @@ class HostPathSchema(Schema):
     DEFAULT_TYPE = 'string'
 
 
+class URISchema(Schema):
+    DEFAULT_TYPE = 'string'
+
+
 class IPAddrSchema(Schema):
     DEFAULT_TYPE = 'string'
 

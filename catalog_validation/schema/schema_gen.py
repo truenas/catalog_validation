@@ -1,6 +1,6 @@
 from .attrs import (
     BooleanSchema, StringSchema, IntegerSchema, PathSchema, HostPathSchema, ListSchema, DictSchema,
-    IPAddrSchema, CronSchema
+    IPAddrSchema, CronSchema, URISchema
 )
 
 
@@ -28,6 +28,9 @@ def get_schema(schema_data):
         schema = IPAddrSchema
     elif s_type == 'cron':
         schema = CronSchema
+    elif s_type == 'uri':
+        schema = URISchema
+
     if schema:
         schema = schema(data=schema_data)
 
