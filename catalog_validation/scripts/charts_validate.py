@@ -52,10 +52,15 @@ def deploy_charts(catalog_path, base_branch):
                 '-f', os.path.join(chart_path, 'test_values.yaml'), '--debug', '--timeout', '600s'
             ], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
         )
-        stderr = cp.communicate(timeout=300)[1]
-        if cp.returncode:
-            failures.append(f'Failed to install chart release {".".join(catalog_item)}: {stderr.decode()}')
+        try:
+            stderr = cp.communicate(timeout=600)[1]
+        except subprocess.TimeoutExpired:
+            failures.append(f'Failed to install {".".join(catalog_item)!r} chart release as it timed out')
             continue
+        else:
+            if cp.returncode:
+                failures.append(f'Failed to install chart release {".".join(catalog_item)}: {stderr.decode()}')
+                continue
 
         print(f'[\033[94mINFO\x1B[0m]\tTesting {".".join(catalog_item)}')
         # We have deployed the chart release, now let's test it
@@ -63,9 +68,13 @@ def deploy_charts(catalog_path, base_branch):
             ['helm', 'test', chart_release_name, '-n', chart_release_name, '--debug'],
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env,
         )
-        err = cp.communicate(timeout=300)[0]
-        if cp.returncode:
-            failures.append(f'Helm test failed for {".".join(catalog_item)}: {err.decode(errors="ignore")}')
+        try:
+            err = cp.communicate(timeout=600)[0]
+        except subprocess.TimeoutExpired:
+            failures.append(f'Failed to test {".".join(catalog_item)!r} chart release as it timed out')
+        else:
+            if cp.returncode:
+                failures.append(f'Helm test failed for {".".join(catalog_item)}: {err.decode(errors="ignore")}')
 
         print(f'[\033[94mINFO\x1B[0m]\tRemoving {".".join(catalog_item)}')
         # We have deployed and tested the chart release, now let's remove it
@@ -74,9 +83,13 @@ def deploy_charts(catalog_path, base_branch):
             ['helm', 'uninstall', chart_release_name, '-n', chart_release_name, '--debug'],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env,
         )
-        cp.communicate(timeout=300)
-        if cp.returncode:
-            failures.append(f'Helm Uninstall failed for {".".join(catalog_item)}')
+        try:
+            cp.communicate(timeout=600)
+        except subprocess.TimeoutExpired:
+            failures.append(f'Failed to uninstall {".".join(catalog_item)!r} chart release as it timed out')
+        else:
+            if cp.returncode:
+                failures.append(f'Helm Uninstall failed for {".".join(catalog_item)}')
 
     if not failures:
         print('[\033[92mOK\x1B[0m]\tTests passed successfully')
