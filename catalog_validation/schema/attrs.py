@@ -97,6 +97,9 @@ class Schema:
                 },
             },
             'required': ['type'],
+            'dependencies': {
+                'show_subquestions_if': ['subquestions']
+            }
         }
         if self.DEFAULT_TYPE:
             schema['properties']['default'] = {
@@ -105,14 +108,15 @@ class Schema:
         if hasattr(self, 'enum'):
             schema['properties']['enum'] = {
                 'type': 'array',
-                'items': [{
+                'items': {
                     'type': 'object',
                     'properties': {
                         'value': {'type': [self.DEFAULT_TYPE] + (['null'] if self.null else [])},
                         'description': {'type': ['string', 'null']},
                     },
+                    'additionalProperties': False,
                     'required': ['value', 'description']
-                }]
+                },
             }
         return schema
 
