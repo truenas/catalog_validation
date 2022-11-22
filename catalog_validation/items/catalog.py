@@ -8,7 +8,7 @@ from catalog_validation.utils import VALID_TRAIN_REGEX
 from .items_util import get_item_details, get_default_questions_context
 
 
-def item_details(items: dict, location: str, questions_context: typing.Optional[dict], item_key: str):
+def item_details(items: dict, location: str, questions_context: typing.Optional[dict], item_key: str) -> dict:
     train = items[item_key]
     item = item_key.removesuffix(f'_{train}')
     item_location = os.path.join(location, train, item)
@@ -18,7 +18,7 @@ def item_details(items: dict, location: str, questions_context: typing.Optional[
     }
 
 
-def retrieve_train_names(location: str, all_trains=True, trains_filter=None):
+def retrieve_train_names(location: str, all_trains=True, trains_filter=None) -> list:
     train_names = []
     trains_filter = trains_filter or []
     for train in os.listdir(location):
