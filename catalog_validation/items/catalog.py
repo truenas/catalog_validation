@@ -17,5 +17,15 @@ def item_details(items: dict, location: str, questions_context: typing.Optional[
     }
 
 
-
-
+def retrieve_train_names(self, location, all_trains=True, trains_filter=None):
+    train_names = []
+    trains_filter = trains_filter or []
+    for train in os.listdir(location):
+        if (
+            not (all_trains or train in trains_filter) or not os.path.isdir(
+                os.path.join(location, train)
+            ) or train.startswith('.') or train in ('library', 'docs') or not VALID_TRAIN_REGEX.match(train)
+        ):
+            continue
+        train_names.append(train)
+    return train_names
