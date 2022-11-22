@@ -1,7 +1,6 @@
-import typing
-
 import markdown
 import os
+import typing
 import yaml
 
 from pkg_resources import parse_version
@@ -16,10 +15,13 @@ from .validate_utils import validate_item, validate_item_version
 ITEM_KEYS = ['icon_url']
 
 
-def get_item_details(item_location: str, questions_context: dict, options: dict) -> dict:
+def get_item_details(
+    item_location: str, questions_context: typing.Optional[dict] = None, options: typing.Optional[dict] = None
+) -> dict:
     item = item_location.rsplit('/', 1)[-1]
     train = item_location.rsplit('/', 2)[-2]
 
+    options = options or {}
     retrieve_versions = options.get('retrieve_versions', True)
     item_data = {
         'name': item,
@@ -76,7 +78,9 @@ def get_item_details(item_location: str, questions_context: dict, options: dict)
     return item_data
 
 
-def get_item_details_impl(item_path: str, schema: str, questions_context: dict, options: dict) -> dict:
+def get_item_details_impl(
+    item_path: str, schema: str, questions_context: typing.Optional[dict], options: typing.Optional[dict]
+) -> dict:
     # Each directory under item path represents a version of the item and we need to retrieve details
     # for each version available under the item
     retrieve_latest_version = options.get('retrieve_latest_version')
@@ -120,7 +124,7 @@ def get_item_details_impl(item_path: str, schema: str, questions_context: dict, 
 
 
 def get_item_version_details(
-    version_path: str, questions_context: dict, options: typing.Optional[dict] = None
+    version_path: str, questions_context: typing.Optional[dict], options: typing.Optional[dict] = None
 ) -> dict:
     version_data = {'location': version_path, 'required_features': set()}
     for key, filename, parser in (
@@ -138,7 +142,7 @@ def get_item_version_details(
 
     # We will normalise questions now so that if they have any references, we render them accordingly
     # like a field referring to available interfaces on the system
-    normalise_questions(version_data, questions_context)
+    normalise_questions(version_data, questions_context or get_default_questions_context())
 
     version_data.update({
         'supported': version_supported(version_data),
@@ -151,3 +155,15 @@ def get_item_version_details(
         version_data['human_version'] = f'{chart_metadata["appVersion"]}_{chart_metadata["version"]}'
 
     return version_data
+
+
+def get_default_questions_context() -> dict:
+    return {
+        'nic_choices': [],
+        'gpus': {},
+        'timezones': {'Asia/Saigon': 'Asia/Saigon', 'Asia/Damascus': 'Asia/Damascus'},
+        'node_ip': '192.168.0.10',
+        'certificates': [],
+        'certificate_authorities': [],
+        'system.general.config': {'timezone': 'America/Los_Angeles'},
+    }
