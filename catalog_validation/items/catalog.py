@@ -18,7 +18,7 @@ def item_details(items: dict, location: str, questions_context: typing.Optional[
     }
 
 
-def retrieve_train_names(self, location, all_trains=True, trains_filter=None):
+def retrieve_train_names(location: str, all_trains=True, trains_filter=None):
     train_names = []
     trains_filter = trains_filter or []
     for train in os.listdir(location):
