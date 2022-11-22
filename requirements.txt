@@ -1,4 +1,5 @@
 jsonschema
 kubernetes
+markdown
 pyyaml
 semantic_version
