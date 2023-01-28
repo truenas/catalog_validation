@@ -24,16 +24,18 @@ def get_item_details(
     options = options or {}
     retrieve_versions = options.get('retrieve_versions', True)
     item_data = {
-        'name': item,
-        'categories': [],
         'app_readme': None,
-        'location': item_location,
+        'categories': [],
+        'description': None,
         'healthy': False,  # healthy means that each version the item hosts is valid and healthy
         'healthy_error': None,  # An error string explaining why the item is not healthy
-        'versions': {},
+        'location': item_location,
         'latest_version': None,
         'latest_app_version': None,
         'latest_human_version': None,
+        'name': item,
+        'title': item.capitalize(),
+        'versions': {},
     }
 
     schema = f'{train}.{item}'
@@ -67,6 +69,10 @@ def get_item_details(
                 if item_data['latest_app_version']:
                     item_data['latest_human_version'] = f'{item_data["latest_app_version"]}_'
                 item_data['latest_human_version'] += k
+            if not item_data['description'] and v['chart_metadata'].get('description'):
+                item_data['description'] = v['chart_metadata']['description']
+            if item_data['title'] == item_data['name'].capitalize() and v['chart_metadata'].get('title'):
+                item_data['title'] = v['chart_metadata']['title']
 
     if unhealthy_versions:
         item_data['healthy_error'] = f'Errors were found with {", ".join(unhealthy_versions)} version(s)'
