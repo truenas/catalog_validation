@@ -41,6 +41,12 @@ def get_catalog_json_schema() -> dict:
                             'latest_human_version': {
                                 'type': 'string',
                             },
+                            'description': {
+                                'type': ['string', 'null'],
+                            },
+                            'title': {
+                                'type': 'string',
+                            },
                             'icon_url': {
                                 'type': ['string', 'null'],
                             }
