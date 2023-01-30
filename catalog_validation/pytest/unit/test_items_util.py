@@ -29,7 +29,7 @@ QUESTION_CONTEXT = {
          'latest_app_version': None,
          'latest_human_version': None,
          'title': 'Chia',
-         'description': 'App description here',
+         'description': None,
      }
      ),
 ])
