@@ -4,8 +4,8 @@ import jsonschema
 import os
 import yaml
 
-from semantic_version import Version
 from jsonschema import validate as json_schema_validate, ValidationError as JsonValidationError
+from semantic_version import Version
 from typing import Optional
 
 from .exceptions import CatalogDoesNotExist, ValidationErrors
@@ -16,8 +16,11 @@ from .items.questions_utils import (
 from .items.utils import get_catalog_json_schema, RECOMMENDED_APPS_FILENAME, RECOMMENDED_APPS_SCHEMA, TRAIN_IGNORE_DIRS
 from .schema.migration_schema import APP_MIGRATION_SCHEMA, MIGRATION_DIRS, RE_MIGRATION_NAME, RE_MIGRATION_NAME_STR
 from .schema.variable import Variable
-from .utils import CACHED_CATALOG_FILE_NAME, validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
 from .validation_utils import validate_chart_version
+from .utils import (
+    CACHED_CATALOG_FILE_NAME, METADATA_JSON_SCHEMA, validate_key_value_types,
+    VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
+)
 
 
 def validate_catalog(catalog_path):
@@ -227,6 +230,13 @@ def validate_catalog_item_version(
             except ValidationErrors as v:
                 verrors.extend(v)
 
+    metadata_path = os.path.join(version_path, 'metadata.yaml')
+    if os.path.exists(metadata_path):
+        try:
+            validate_metadata_yaml(metadata_path, f'{schema}.metadata_configuration')
+        except ValidationErrors as v:
+            verrors.extend(v)
+
     verrors.check()
 
 
@@ -250,6 +260,22 @@ def validate_ix_values_yaml(ix_values_yaml_path, schema):
                 verrors.extend(ve)
     else:
         verrors.add(schema, 'Must be a dictionary')
+
+    verrors.check()
+
+
+def validate_metadata_yaml(metadata_yaml_path, schema):
+    verrors = ValidationErrors()
+    with open(metadata_yaml_path, 'r') as f:
+        try:
+            metadata = yaml.safe_load(f.read())
+        except yaml.YAMLError:
+            verrors.add(schema, 'Must be a valid yaml file')
+        else:
+            try:
+                json_schema_validate(metadata, METADATA_JSON_SCHEMA)
+            except JsonValidationError as e:
+                verrors.add(schema, f'Invalid format specified for application metadata: {e}')
 
     verrors.check()
 

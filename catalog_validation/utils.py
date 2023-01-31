@@ -2,6 +2,47 @@ import re
 
 
 CACHED_CATALOG_FILE_NAME = 'catalog.json'
+METADATA_JSON_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'runAsContext': {
+            'type': 'array',
+            'items': {
+                'type': 'object',
+                'properties': {
+                    'description': {'type': 'string'},
+                    'gid': {'type': 'integer'},
+                    'groupName': {'type': 'string'},
+                    'userName': {'type': 'string'},
+                    'uid': {'type': 'integer'},
+                },
+                'required': ['description'],
+            },
+        },
+        'capabilities': {
+            'type': 'array',
+            'items': {
+                'type': 'object',
+                'properties': {
+                    'description': {'type': 'string'},
+                    'name': {'type': 'string'},
+                },
+                'required': ['description', 'name'],
+            },
+        },
+        'hostMounts': {
+            'type': 'array',
+            'items': {
+                'type': 'object',
+                'properties': {
+                    'description': {'type': 'string'},
+                    'hostPath': {'type': 'string'},
+                },
+                'required': ['description', 'hostPath'],
+            },
+        },
+    },
+}
 VALID_TRAIN_REGEX = re.compile(r'^\w+[\w.-]*$')
 WANTED_FILES_IN_ITEM_VERSION = {'questions.yaml', 'app-readme.md', 'Chart.yaml', 'README.md'}
 
