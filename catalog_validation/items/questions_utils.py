@@ -6,87 +6,84 @@ CUSTOM_PORTALS_ENABLE_KEY = 'enableIXPortals'
 CUSTOM_PORTAL_GROUP_KEY = 'iXPortalsGroupName'
 
 
-def get_custom_portal_question(group_name: str) -> list:
-    return [
-        {
-            'variable': CUSTOM_PORTALS_KEY,
-            'label': 'User Specified Web Portals',
-            'description': 'User(s) can specify custom webUI portals',
-            'group': group_name,
-            'schema': {
-                'type': 'list',
-                'items': [{
-                    'variable': 'portalConfiguration',
-                    'label': 'Portal Configuration',
-                    'description': 'Configure WebUI Portal',
-                    'schema': {
-                        'type': 'dict',
-                        'attrs': [
-                            {
-                                'variable': 'portalName',
-                                'label': 'Portal Name',
-                                'description': 'Specify a UI Portal name to use which would be displayed in the UI',
-                                'schema': {
-                                    'type': 'string',
-                                    'default': 'Web Portal',
-                                    'empty': False,
-                                },
+def get_custom_portal_question(group_name: str) -> dict:
+    return {
+        'variable': CUSTOM_PORTALS_KEY,
+        'label': 'User Specified Web Portals',
+        'description': 'User(s) can specify custom webUI portals',
+        'group': group_name,
+        'schema': {
+            'type': 'list',
+            'items': [{
+                'variable': 'portalConfiguration',
+                'label': 'Portal Configuration',
+                'description': 'Configure WebUI Portal',
+                'schema': {
+                    'type': 'dict',
+                    'attrs': [
+                        {
+                            'variable': 'portalName',
+                            'label': 'Portal Name',
+                            'description': 'Specify a UI Portal name to use which would be displayed in the UI',
+                            'schema': {
+                                'type': 'string',
+                                'default': 'Web Portal',
+                                'empty': False,
                             },
-                            {
-                                'variable': 'protocol',
-                                'label': 'Protocol for Portal',
-                                'description': 'Specify protocol for Portal',
-                                'schema': {
-                                    'type': 'string',
-                                    'default': 'http',
-                                    'enum': [
-                                        {'value': 'http', 'description': 'HTTP Protocol'},
-                                        {'value': 'https', 'description': 'HTTPS Protocol'},
-                                    ],
-                                },
+                        },
+                        {
+                            'variable': 'protocol',
+                            'label': 'Protocol for Portal',
+                            'description': 'Specify protocol for Portal',
+                            'schema': {
+                                'type': 'string',
+                                'default': 'http',
+                                'enum': [
+                                    {'value': 'http', 'description': 'HTTP Protocol'},
+                                    {'value': 'https', 'description': 'HTTPS Protocol'},
+                                ],
                             },
-                            {
-                                'variable': 'useNodeIP',
-                                'label': 'Use Node IP for Portal IP/Domain',
-                                'schema': {
-                                    'type': 'boolean',
-                                    'default': True,
-                                },
+                        },
+                        {
+                            'variable': 'useNodeIP',
+                            'label': 'Use Node IP for Portal IP/Domain',
+                            'schema': {
+                                'type': 'boolean',
+                                'default': True,
                             },
-                            {
-                                'variable': 'host',
-                                'label': 'Portal IP/Domain',
-                                'schema': {
-                                    'type': 'string',
-                                    'show_if': [['useNodeIP', '=', False]],
-                                    '$ref': ['definitions/nodeIP'],
-                                },
+                        },
+                        {
+                            'variable': 'host',
+                            'label': 'Portal IP/Domain',
+                            'schema': {
+                                'type': 'string',
+                                'show_if': [['useNodeIP', '=', False]],
+                                '$ref': ['definitions/nodeIP'],
                             },
-                            {
-                                'variable': 'port',
-                                'label': 'Port',
-                                'description': 'Specify port to be used for Portal access',
-                                'schema': {
-                                    'type': 'int',
-                                    'max': 65535,
-                                    'default': 15000,
-                                },
+                        },
+                        {
+                            'variable': 'port',
+                            'label': 'Port',
+                            'description': 'Specify port to be used for Portal access',
+                            'schema': {
+                                'type': 'int',
+                                'max': 65535,
+                                'default': 15000,
                             },
-                            {
-                                'variable': 'path',
-                                'label': 'Path (optional - leave empty if not required)',
-                                'description': 'Some app(s) might have a sub path i.e http://192.168.0.10:9000/api/',
-                                'schema': {
-                                    'type': 'string',
-                                },
+                        },
+                        {
+                            'variable': 'path',
+                            'label': 'Path (optional - leave empty if not required)',
+                            'description': 'Some app(s) might have a sub path i.e http://192.168.0.10:9000/api/',
+                            'schema': {
+                                'type': 'string',
                             },
-                        ],
-                    },
-                }],
-            },
-
-        }
-    ]
+                        },
+                    ],
+                },
+            }],
+        },
+    }
 
 
 def normalise_questions(version_data: dict, context: dict) -> None:
