@@ -159,39 +159,36 @@ def validate_questions_yaml(questions_yaml_path, schema):
     verrors.check()
 
     validate_key_value_types(
-        questions_config, (('groups', list), ('questions', list), ('portals', dict, False)), verrors, schema
+        questions_config, (
+            ('groups', list), ('questions', list), ('portals', dict, False), ('enableIXPortals', bool, False),
+        ), verrors, schema
     )
 
+    verrors.check()
+
     groups = []
-    if type(questions_config.get('groups')) == list:
-        for index, group in enumerate(questions_config['groups']):
-            if type(group) != dict:
-                verrors.add(f'{schema}.groups.{index}', 'Type of group should be a dictionary.')
-                continue
+    for index, group in enumerate(questions_config['groups']):
+        if type(group) != dict:
+            verrors.add(f'{schema}.groups.{index}', 'Type of group should be a dictionary.')
+            continue
 
-            if group.get('name'):
-                groups.append(group['name'])
+        if group.get('name'):
+            groups.append(group['name'])
 
-            validate_key_value_types(group, (('name', str), ('description', str)), verrors, f'{schema}.group.{index}')
+        validate_key_value_types(group, (('name', str), ('description', str)), verrors, f'{schema}.group.{index}')
 
-    if type(questions_config.get('questions')) != list:
-        # We only want to raise verrors here if questions is not a list as otherwise we can raise them at the end
-        # after validating the questions
-        verrors.check()
-
-    if isinstance(questions_config.get('portals'), dict):
-        for index, portal_details in enumerate(questions_config['portals'].items()):
-            portal_type, portal_schema = portal_details
-            error_schema = f'{schema}.portals.{index}'
-            if not isinstance(portal_type, str):
-                verrors.add(error_schema, 'Portal type must be a string')
-            if not isinstance(portal_schema, dict):
-                verrors.add(error_schema, 'Portal schema must be a dictionary')
-            else:
-                validate_key_value_types(
-                    portal_schema, (('protocols', list), ('host', list), ('ports', list), ('path', str, False)),
-                    verrors, error_schema
-                )
+    for index, portal_details in enumerate(questions_config['portals'].items()):
+        portal_type, portal_schema = portal_details
+        error_schema = f'{schema}.portals.{index}'
+        if not isinstance(portal_type, str):
+            verrors.add(error_schema, 'Portal type must be a string')
+        if not isinstance(portal_schema, dict):
+            verrors.add(error_schema, 'Portal schema must be a dictionary')
+        else:
+            validate_key_value_types(
+                portal_schema, (('protocols', list), ('host', list), ('ports', list), ('path', str, False)),
+                verrors, error_schema
+            )
 
     for index, question in enumerate(questions_config['questions']):
         validate_question(question, f'{schema}.questions.{index}', verrors, (('group', str),))
