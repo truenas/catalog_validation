@@ -4,6 +4,7 @@ import yaml
 
 from semantic_version import Version
 
+from catalog_validation.items.questions_utils import CUSTOM_PORTALS_KEY, CUSTOM_PORTALS_ENABLE_KEY
 from catalog_validation.schema.variable import Variable
 from .exceptions import CatalogDoesNotExist, ValidationErrors
 from .utils import validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
@@ -160,7 +161,7 @@ def validate_questions_yaml(questions_yaml_path, schema):
 
     validate_key_value_types(
         questions_config, (
-            ('groups', list), ('questions', list), ('portals', dict, False), ('enableIXPortals', bool, False),
+            ('groups', list), ('questions', list), ('portals', dict, False), (CUSTOM_PORTALS_ENABLE_KEY, bool, False),
         ), verrors, schema
     )
 
@@ -208,6 +209,14 @@ def validate_question(question_data, schema, verrors, validate_top_level_attrs=N
         question_data, (('variable', str), ('label', str), ('schema', dict)) + validate_top_level_attrs, verrors, schema
     )
     if type(question_data.get('schema')) != dict:
+        return
+
+    if question_data['variable'] == CUSTOM_PORTALS_KEY:
+        verrors.add(
+            f'{schema}.variable',
+            f'{CUSTOM_PORTALS_KEY!r} is a reserved variable name and cannot be specified by app developer'
+        )
+        # No need to validate the question data etc here
         return
 
     try:

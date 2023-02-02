@@ -1,10 +1,14 @@
 import itertools
 
 
+CUSTOM_PORTALS_KEY = 'iXPortals'
+CUSTOM_PORTALS_ENABLE_KEY = 'enableIXPortals'
+
+
 def get_custom_portal_question(group_name: str) -> list:
     return [
         {
-            'variable': 'iXPortals',
+            'variable': CUSTOM_PORTALS_KEY,
             'label': 'User Specified Web Portals',
             'description': 'User(s) can specify custom webUI portals',
             'group': group_name,
