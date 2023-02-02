@@ -3,6 +3,7 @@ import itertools
 
 CUSTOM_PORTALS_KEY = 'iXPortals'
 CUSTOM_PORTALS_ENABLE_KEY = 'enableIXPortals'
+CUSTOM_PORTAL_GROUP_KEY = 'iXPortalsGroupName'
 
 
 def get_custom_portal_question(group_name: str) -> list:

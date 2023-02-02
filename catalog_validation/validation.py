@@ -4,7 +4,9 @@ import yaml
 
 from semantic_version import Version
 
-from catalog_validation.items.questions_utils import CUSTOM_PORTALS_KEY, CUSTOM_PORTALS_ENABLE_KEY
+from catalog_validation.items.questions_utils import (
+    CUSTOM_PORTALS_KEY, CUSTOM_PORTALS_ENABLE_KEY, CUSTOM_PORTAL_GROUP_KEY,
+)
 from catalog_validation.schema.variable import Variable
 from .exceptions import CatalogDoesNotExist, ValidationErrors
 from .utils import validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
@@ -162,6 +164,7 @@ def validate_questions_yaml(questions_yaml_path, schema):
     validate_key_value_types(
         questions_config, (
             ('groups', list), ('questions', list), ('portals', dict, False), (CUSTOM_PORTALS_ENABLE_KEY, bool, False),
+            (CUSTOM_PORTAL_GROUP_KEY, str, False),
         ), verrors, schema
     )
 
@@ -195,6 +198,18 @@ def validate_questions_yaml(questions_yaml_path, schema):
         validate_question(question, f'{schema}.questions.{index}', verrors, (('group', str),))
         if question.get('group') and question['group'] not in groups:
             verrors.add(f'{schema}.questions.{index}.group', f'Please specify a group declared in "{schema}.groups"')
+
+    if questions_config.get(CUSTOM_PORTALS_ENABLE_KEY):
+        if not questions_config.get(CUSTOM_PORTAL_GROUP_KEY):
+            verrors.add(
+                f'{schema}.{CUSTOM_PORTALS_ENABLE_KEY}',
+                f'{CUSTOM_PORTAL_GROUP_KEY!r} must be specified when user specified portals are desired'
+            )
+        elif questions_config[CUSTOM_PORTAL_GROUP_KEY] not in groups:
+            verrors.add(
+                f'{schema}.{CUSTOM_PORTAL_GROUP_KEY}',
+                'Specified group not declared under "groups"'
+            )
 
     verrors.check()
 
