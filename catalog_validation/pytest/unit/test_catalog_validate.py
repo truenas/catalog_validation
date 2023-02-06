@@ -103,6 +103,53 @@ def test_validate_train_structure(train_path, should_work):
         ''',
         False
     ),
+    (
+        '''
+            enableIXPortals: true
+            groups:
+              - name: "Machinaris Configuration"
+                description: "Configure timezone for machianaris"
+
+            questions:
+              - variable: timezone
+                label: "Configure timezone"
+                group: "Machinaris Configuration"
+                description: "Configure timezone for machianaris"
+        ''',
+        False
+    ),
+    (
+        '''
+            enableIXPortals: true
+            iXPortalsGroupName: "Machinaris Configuration"
+            groups:
+              - name: "Machinaris Configuration"
+                description: "Configure timezone for machianaris"
+
+            questions:
+              - variable: timezone
+                label: "Configure timezone"
+                group: "Machinaris Configuration"
+                description: "Configure timezone for machianaris"
+        ''',
+        True
+    ),
+    (
+        '''
+            enableIXPortals: true
+            iXPortalsGroupName: "Invalid Group name"
+            groups:
+              - name: "Machinaris Configuration"
+                description: "Configure timezone for machianaris"
+
+            questions:
+              - variable: timezone
+                label: "Configure timezone"
+                group: "Machinaris Configuration"
+                description: "Configure timezone for machianaris"
+        ''',
+        False
+    ),
 
 ])
 def test_validate_questions_yaml(mocker, test_yaml, should_work):
