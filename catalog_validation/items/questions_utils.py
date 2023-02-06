@@ -88,11 +88,12 @@ def get_custom_portal_question(group_name: str) -> dict:
 
 def normalise_questions(version_data: dict, context: dict) -> None:
     version_data['required_features'] = set()
-    for question in version_data['schema']['questions'] + (
+    version_data['schema']['questions'].extend(
         [
             get_custom_portal_question(version_data['schema'][CUSTOM_PORTAL_GROUP_KEY])
-        ] if version_data['schema'][CUSTOM_PORTALS_ENABLE_KEY] else []
-    ):
+        ] if version_data['schema'].get('CUSTOM_PORTALS_ENABLE_KEY') else []
+    )
+    for question in version_data['schema']['questions']:
         normalise_question(question, version_data, context)
     version_data['required_features'] = list(version_data['required_features'])
 
