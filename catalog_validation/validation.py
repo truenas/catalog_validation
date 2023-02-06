@@ -181,7 +181,7 @@ def validate_questions_yaml(questions_yaml_path, schema):
 
         validate_key_value_types(group, (('name', str), ('description', str)), verrors, f'{schema}.group.{index}')
 
-    for index, portal_details in enumerate(questions_config['portals'].items()):
+    for index, portal_details in enumerate((questions_config.get('portals') or {}).items()):
         portal_type, portal_schema = portal_details
         error_schema = f'{schema}.portals.{index}'
         if not isinstance(portal_type, str):
