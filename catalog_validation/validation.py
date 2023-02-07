@@ -7,6 +7,7 @@ from semantic_version import Version
 from catalog_validation.items.questions_utils import (
     CUSTOM_PORTALS_KEY, CUSTOM_PORTALS_ENABLE_KEY, CUSTOM_PORTAL_GROUP_KEY,
 )
+from catalog_validation.items.ix_values_utils import validate_ix_values_schema
 from catalog_validation.schema.variable import Variable
 from .exceptions import CatalogDoesNotExist, ValidationErrors
 from .utils import validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
@@ -144,6 +145,31 @@ def validate_catalog_item_version(version_path, schema):
         except ValidationErrors as v:
             verrors.extend(v)
 
+    ix_values_yaml_path = os.path.join(version_path, 'ix_values.yaml')
+    if os.path.exists(ix_values_yaml_path):
+        try:
+            validate_ix_values_yaml(ix_values_yaml_path, f'{schema}.ix_values')
+        except ValidationErrors as v:
+            verrors.extend(v)
+
+    verrors.check()
+
+
+def validate_ix_values_yaml(ix_values_yaml_path, schema):
+    verrors = ValidationErrors()
+
+    with open(ix_values_yaml_path, 'r') as f:
+        try:
+            ix_values = yaml.safe_load(f.read())
+        except yaml.YAMLError:
+            verrors.add(schema, 'Must be a valid yaml file')
+
+        portals = ix_values.get(CUSTOM_PORTALS_KEY)
+        if portals:
+            try:
+                validate_ix_values_schema(schema, portals)
+            except ValidationErrors as ve:
+                verrors.extend(ve)
     verrors.check()
 
 

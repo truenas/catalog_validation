@@ -43,6 +43,7 @@ IX_VALUES_JSON_SCHEMA = {
                 },
             }],
         'required': ['portalName', 'protocol', 'useNodeIP', 'port'],
+        'additionalProperties': True,
     },
 }
 
