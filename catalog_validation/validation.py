@@ -4,6 +4,10 @@ import yaml
 
 from semantic_version import Version
 
+from catalog_validation.items.questions_utils import (
+    CUSTOM_PORTALS_KEY, CUSTOM_PORTALS_ENABLE_KEY, CUSTOM_PORTAL_GROUP_KEY,
+)
+from catalog_validation.items.ix_values_utils import validate_ix_values_schema
 from catalog_validation.schema.variable import Variable
 from .exceptions import CatalogDoesNotExist, ValidationErrors
 from .utils import validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
@@ -141,6 +145,31 @@ def validate_catalog_item_version(version_path, schema):
         except ValidationErrors as v:
             verrors.extend(v)
 
+    ix_values_yaml_path = os.path.join(version_path, 'ix_values.yaml')
+    if os.path.exists(ix_values_yaml_path):
+        try:
+            validate_ix_values_yaml(ix_values_yaml_path, f'{schema}.ix_values')
+        except ValidationErrors as v:
+            verrors.extend(v)
+
+    verrors.check()
+
+
+def validate_ix_values_yaml(ix_values_yaml_path, schema):
+    verrors = ValidationErrors()
+
+    with open(ix_values_yaml_path, 'r') as f:
+        try:
+            ix_values = yaml.safe_load(f.read())
+        except yaml.YAMLError:
+            verrors.add(schema, 'Must be a valid yaml file')
+
+        portals = ix_values.get(CUSTOM_PORTALS_KEY)
+        if portals:
+            try:
+                validate_ix_values_schema(schema, portals)
+            except ValidationErrors as ve:
+                verrors.extend(ve)
     verrors.check()
 
 
@@ -159,44 +188,54 @@ def validate_questions_yaml(questions_yaml_path, schema):
     verrors.check()
 
     validate_key_value_types(
-        questions_config, (('groups', list), ('questions', list), ('portals', dict, False)), verrors, schema
+        questions_config, (
+            ('groups', list), ('questions', list), ('portals', dict, False), (CUSTOM_PORTALS_ENABLE_KEY, bool, False),
+            (CUSTOM_PORTAL_GROUP_KEY, str, False),
+        ), verrors, schema
     )
 
+    verrors.check()
+
     groups = []
-    if type(questions_config.get('groups')) == list:
-        for index, group in enumerate(questions_config['groups']):
-            if type(group) != dict:
-                verrors.add(f'{schema}.groups.{index}', 'Type of group should be a dictionary.')
-                continue
+    for index, group in enumerate(questions_config['groups']):
+        if type(group) != dict:
+            verrors.add(f'{schema}.groups.{index}', 'Type of group should be a dictionary.')
+            continue
 
-            if group.get('name'):
-                groups.append(group['name'])
+        if group.get('name'):
+            groups.append(group['name'])
 
-            validate_key_value_types(group, (('name', str), ('description', str)), verrors, f'{schema}.group.{index}')
+        validate_key_value_types(group, (('name', str), ('description', str)), verrors, f'{schema}.group.{index}')
 
-    if type(questions_config.get('questions')) != list:
-        # We only want to raise verrors here if questions is not a list as otherwise we can raise them at the end
-        # after validating the questions
-        verrors.check()
-
-    if isinstance(questions_config.get('portals'), dict):
-        for index, portal_details in enumerate(questions_config['portals'].items()):
-            portal_type, portal_schema = portal_details
-            error_schema = f'{schema}.portals.{index}'
-            if not isinstance(portal_type, str):
-                verrors.add(error_schema, 'Portal type must be a string')
-            if not isinstance(portal_schema, dict):
-                verrors.add(error_schema, 'Portal schema must be a dictionary')
-            else:
-                validate_key_value_types(
-                    portal_schema, (('protocols', list), ('host', list), ('ports', list), ('path', str, False)),
-                    verrors, error_schema
-                )
+    for index, portal_details in enumerate((questions_config.get('portals') or {}).items()):
+        portal_type, portal_schema = portal_details
+        error_schema = f'{schema}.portals.{index}'
+        if not isinstance(portal_type, str):
+            verrors.add(error_schema, 'Portal type must be a string')
+        if not isinstance(portal_schema, dict):
+            verrors.add(error_schema, 'Portal schema must be a dictionary')
+        else:
+            validate_key_value_types(
+                portal_schema, (('protocols', list), ('host', list), ('ports', list), ('path', str, False)),
+                verrors, error_schema
+            )
 
     for index, question in enumerate(questions_config['questions']):
         validate_question(question, f'{schema}.questions.{index}', verrors, (('group', str),))
         if question.get('group') and question['group'] not in groups:
             verrors.add(f'{schema}.questions.{index}.group', f'Please specify a group declared in "{schema}.groups"')
+
+    if questions_config.get(CUSTOM_PORTALS_ENABLE_KEY):
+        if not questions_config.get(CUSTOM_PORTAL_GROUP_KEY):
+            verrors.add(
+                f'{schema}.{CUSTOM_PORTALS_ENABLE_KEY}',
+                f'{CUSTOM_PORTAL_GROUP_KEY!r} must be specified when user specified portals are desired'
+            )
+        elif questions_config[CUSTOM_PORTAL_GROUP_KEY] not in groups:
+            verrors.add(
+                f'{schema}.{CUSTOM_PORTAL_GROUP_KEY}',
+                'Specified group not declared under "groups"'
+            )
 
     verrors.check()
 
@@ -211,6 +250,14 @@ def validate_question(question_data, schema, verrors, validate_top_level_attrs=N
         question_data, (('variable', str), ('label', str), ('schema', dict)) + validate_top_level_attrs, verrors, schema
     )
     if type(question_data.get('schema')) != dict:
+        return
+
+    if question_data['variable'] == CUSTOM_PORTALS_KEY:
+        verrors.add(
+            f'{schema}.variable',
+            f'{CUSTOM_PORTALS_KEY!r} is a reserved variable name and cannot be specified by app developer'
+        )
+        # No need to validate the question data etc here
         return
 
     try:

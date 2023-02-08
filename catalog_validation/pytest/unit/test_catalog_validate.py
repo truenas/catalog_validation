@@ -103,6 +103,53 @@ def test_validate_train_structure(train_path, should_work):
         ''',
         False
     ),
+    (
+        '''
+            enableIXPortals: true
+            groups:
+              - name: "Machinaris Configuration"
+                description: "Configure timezone for machianaris"
+
+            questions:
+              - variable: timezone
+                label: "Configure timezone"
+                group: "Machinaris Configuration"
+                description: "Configure timezone for machianaris"
+        ''',
+        False
+    ),
+    (
+        '''
+            enableIXPortals: true
+            iXPortalsGroupName: "Machinaris Configuration"
+            groups:
+              - name: "Machinaris Configuration"
+                description: "Configure timezone for machianaris"
+
+            questions:
+              - variable: timezone
+                label: "Configure timezone"
+                group: "Machinaris Configuration"
+                description: "Configure timezone for machianaris"
+        ''',
+        True
+    ),
+    (
+        '''
+            enableIXPortals: true
+            iXPortalsGroupName: "Invalid Group name"
+            groups:
+              - name: "Machinaris Configuration"
+                description: "Configure timezone for machianaris"
+
+            questions:
+              - variable: timezone
+                label: "Configure timezone"
+                group: "Machinaris Configuration"
+                description: "Configure timezone for machianaris"
+        ''',
+        False
+    ),
 
 ])
 def test_validate_questions_yaml(mocker, test_yaml, should_work):
@@ -177,6 +224,7 @@ def test_validate_catalog_item_version(mocker, chart_yaml, should_work):
     open_file = mocker.mock_open(read_data=chart_yaml)
     mocker.patch('builtins.open', open_file)
     mocker.patch('catalog_validation.validation.validate_questions_yaml', return_value=None)
+    mocker.patch('catalog_validation.validation.validate_ix_values_yaml', return_value=None)
     if should_work:
         assert validate_catalog_item_version(
             '/mnt/mypool/ix-applications/catalogs/github_com_truenas_charts_git_master/charts/storj/1.0.4',
