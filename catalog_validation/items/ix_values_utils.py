@@ -3,7 +3,7 @@ from jsonschema import validate as json_schema_validate, ValidationError as Json
 from catalog_validation.exceptions import ValidationErrors
 
 
-IX_VALUES_JSON_SCHEMA = {
+CUSTOM_PORTALS_JSON_SCHEMA = {
     'type': 'array',
     'items': {
         'type': 'object',
@@ -43,7 +43,6 @@ IX_VALUES_JSON_SCHEMA = {
                 },
             }],
         'required': ['portalName', 'protocol', 'useNodeIP', 'port'],
-        'additionalProperties': True,
     },
 }
 
@@ -52,7 +51,7 @@ def validate_ix_values_schema(schema, data):
     verrors = ValidationErrors()
 
     try:
-        json_schema_validate(data, IX_VALUES_JSON_SCHEMA)
+        json_schema_validate(data, CUSTOM_PORTALS_JSON_SCHEMA)
     except JsonValidationError as e:
         verrors.add(schema, f'Failed to validate schema: {e}')
 
