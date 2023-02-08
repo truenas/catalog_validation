@@ -91,7 +91,7 @@ def normalise_questions(version_data: dict, context: dict) -> None:
     version_data['schema']['questions'].extend(
         [
             get_custom_portal_question(version_data['schema'][CUSTOM_PORTAL_GROUP_KEY])
-        ] if version_data['schema'].get('CUSTOM_PORTALS_ENABLE_KEY') else []
+        ] if version_data['schema'].get(CUSTOM_PORTALS_ENABLE_KEY) else []
     )
     for question in version_data['schema']['questions']:
         normalise_question(question, version_data, context)
