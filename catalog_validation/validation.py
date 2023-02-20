@@ -44,6 +44,10 @@ def validate_catalog(catalog_path):
     verrors.check()
 
 
+def validate_migrations(migration_dir):
+    pass
+
+
 def validate_train_structure(train_path):
     train = os.path.basename(train_path)
     verrors = ValidationErrors()
