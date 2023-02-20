@@ -6,13 +6,14 @@ import yaml
 from semantic_version import Version
 from jsonschema import validate as json_schema_validate, ValidationError as JsonValidationError
 
-from catalog_validation.items.questions_utils import (
+from .exceptions import CatalogDoesNotExist, ValidationErrors
+from .items.ix_values_utils import validate_ix_values_schema
+from .items.questions_utils import (
     CUSTOM_PORTALS_KEY, CUSTOM_PORTALS_ENABLE_KEY, CUSTOM_PORTAL_GROUP_KEY,
 )
-from catalog_validation.items.ix_values_utils import validate_ix_values_schema
-from catalog_validation.items.utils import get_catalog_json_schema
-from catalog_validation.schema.variable import Variable
-from .exceptions import CatalogDoesNotExist, ValidationErrors
+from .items.utils import get_catalog_json_schema
+from .schema.migration_schema import MIGRATION_DIRS
+from .schema.variable import Variable
 from .utils import CACHED_CATALOG_FILE_NAME, validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
 
 
@@ -44,14 +45,36 @@ def validate_catalog(catalog_path):
 
     for file_dir in os.listdir(catalog_path):
         complete_path = os.path.join(catalog_path, file_dir)
-        if file_dir.startswith('.') or not os.path.isdir(complete_path) or file_dir in ('library', 'docs'):
+        if file_dir not in MIGRATION_DIRS and (
+            file_dir.startswith('.') or not os.path.isdir(complete_path) or file_dir in ('library', 'docs')
+        ):
             continue
-        try:
-            validate_train_structure(complete_path)
-        except ValidationErrors as e:
-            verrors.extend(e)
+        if file_dir in MIGRATION_DIRS:
+            if all(os.listdir(migration_dir) for migration_dir in map(
+                lambda d: os.path.join(catalog_path, d), MIGRATION_DIRS
+            ) if os.path.exists(migration_dir) and os.path.isdir(MIGRATION_DIRS)):
+                verrors.add(
+                    'app_migrations', f'Both {", ".join(MIGRATION_DIRS)!r} cannot be used to specify app migrations'
+                )
+            else:
+                for directory in MIGRATION_DIRS:
+                    migration_dir = os.path.join(catalog_path, directory)
+                    if not os.path.exists(MIGRATION_DIRS):
+                        continue
+                    if os.path.isdir(migration_dir):
+                        try:
+                            validate_migrations(migration_dir)
+                        except ValidationErrors as e:
+                            verrors.extend(e)
+                    else:
+                        verrors.add('app_migrations', f'{directory!r} is not a directory')
         else:
-            items.extend(get_train_items(complete_path))
+            try:
+                validate_train_structure(complete_path)
+            except ValidationErrors as e:
+                verrors.extend(e)
+            else:
+                items.extend(get_train_items(complete_path))
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=5 if len(items) > 10 else 2) as exc:
         for item in items:
