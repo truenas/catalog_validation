@@ -25,7 +25,9 @@ def retrieve_train_names(location: str, all_trains=True, trains_filter=None) -> 
         if (
             not (all_trains or train in trains_filter) or not os.path.isdir(
                 os.path.join(location, train)
-            ) or train.startswith('.') or train in ('library', 'docs') or not VALID_TRAIN_REGEX.match(train)
+            ) or train.startswith('.') or train in (
+                'library', 'docs', 'ix-migrations'
+            ) or not VALID_TRAIN_REGEX.match(train)
         ):
             continue
         train_names.append(train)
