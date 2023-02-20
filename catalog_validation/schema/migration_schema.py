@@ -33,3 +33,4 @@ APP_MIGRATION_SCHEMA = {
         ],
     }],
 }
+MIGRATION_DIRS = ['.migrations', 'ix-migrations']
