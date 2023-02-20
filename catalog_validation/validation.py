@@ -1,4 +1,6 @@
 import concurrent.futures
+import json
+import jsonschema
 import os
 import yaml
 
@@ -9,7 +11,7 @@ from .items.ix_values_utils import validate_ix_values_schema
 from .items.questions_utils import (
     CUSTOM_PORTALS_KEY, CUSTOM_PORTALS_ENABLE_KEY, CUSTOM_PORTAL_GROUP_KEY,
 )
-from .schema.migration_schema import MIGRATION_DIRS
+from .schema.migration_schema import APP_MIGRATION_SCHEMA, MIGRATION_DIRS, RE_MIGRATION_NAME, RE_MIGRATION_NAME_STR
 from .schema.variable import Variable
 from .utils import validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
 
@@ -68,7 +70,24 @@ def validate_catalog(catalog_path):
 
 
 def validate_migrations(migration_dir):
-    pass
+    verrors = ValidationErrors()
+    for migration_file in os.listdir(migration_dir):
+        if not RE_MIGRATION_NAME.findall(migration_file):
+            verrors.add(
+                f'app_migrations.{migration_file}',
+                'Invalid naming scheme used for migration file name. '
+                f'It should be conforming to {RE_MIGRATION_NAME_STR!r} pattern.'
+            )
+        else:
+            try:
+                with open(os.path.join(migration_dir, migration_file), 'r') as f:
+                    data = json.loads(f.read())
+                jsonschema.validate(data, APP_MIGRATION_SCHEMA)
+            except (json.JSONDecodeError, jsonschema.ValidationError) as e:
+                verrors.add(
+                    f'app_migrations.{migration_file}',
+                    f'Failed to validate migration file structure: {e}'
+                )
 
 
 def validate_train_structure(train_path):

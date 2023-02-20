@@ -1,3 +1,6 @@
+import re
+
+
 APP_MIGRATION_SCHEMA = {
     'type': 'array',
     'items': [{
@@ -34,3 +37,5 @@ APP_MIGRATION_SCHEMA = {
     }],
 }
 MIGRATION_DIRS = ['.migrations', 'ix-migrations']
+RE_MIGRATION_NAME_STR = r'^\d+\w.json$'
+RE_MIGRATION_NAME = re.compile(RE_MIGRATION_NAME_STR)
