@@ -24,6 +24,7 @@ QUESTION_CONTEXT = {
          'location': '/mnt/mypool/ix-applications/catalogs/github_com_truenas_charts_git_master/charts/chia',
          'healthy': True,
          'healthy_error': None,
+         'last_update': None,
          'versions': {},
          'latest_version': None,
          'latest_app_version': None,
@@ -60,6 +61,7 @@ def test_get_item_details(mocker, item_location, options, items_data):
                     'healthy': True,
                     'supported': False,
                     'healthy_error': None,
+                    'last_update': None,
                     'location': '/mnt/mypool/ix-applications/catalogs/github_com_truenas_'
                                 'charts_git_master/charts/chia/1.3.37',
                     'required_features': [],
