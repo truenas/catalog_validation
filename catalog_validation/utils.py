@@ -4,6 +4,7 @@ from collections import namedtuple
 
 CatalogItem = namedtuple('CatalogItem', 'train item version')
 
+CACHED_CATALOG_FILE_NAME = 'catalog.json'
 VALID_TRAIN_REGEX = re.compile(r'^\w+[\w.-]*$')
 WANTED_FILES_IN_ITEM_VERSION = {'questions.yaml', 'app-readme.md', 'Chart.yaml', 'README.md'}
 

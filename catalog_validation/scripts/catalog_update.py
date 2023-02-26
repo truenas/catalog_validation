@@ -4,6 +4,7 @@ import json
 import os
 
 from catalog_validation.items.catalog import get_items_in_trains, retrieve_train_names, retrieve_trains_data
+from catalog_validation.utils import CACHED_CATALOG_FILE_NAME
 
 
 def get_trains(location: str) -> dict:
@@ -16,7 +17,7 @@ def get_trains(location: str) -> dict:
 
 
 def update_catalog_file(location: str) -> None:
-    catalog_file_path = os.path.join(location, 'catalog.json')
+    catalog_file_path = os.path.join(location, CACHED_CATALOG_FILE_NAME)
     with open(catalog_file_path, 'w') as f:
         f.write(json.dumps(get_trains(location), indent=4))
 
