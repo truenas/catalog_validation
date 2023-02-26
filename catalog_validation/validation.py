@@ -10,7 +10,7 @@ from catalog_validation.items.questions_utils import (
 from catalog_validation.items.ix_values_utils import validate_ix_values_schema
 from catalog_validation.schema.variable import Variable
 from .exceptions import CatalogDoesNotExist, ValidationErrors
-from .utils import validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
+from .utils import CACHED_CATALOG_FILE_NAME, validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
 
 
 def validate_catalog(catalog_path):
@@ -20,6 +20,14 @@ def validate_catalog(catalog_path):
     verrors = ValidationErrors()
     items = []
     item_futures = []
+    if not os.path.exists(os.path.join(catalog_path, CACHED_CATALOG_FILE_NAME)):
+        verrors.add(
+            'cached_catalog_file',
+            f'{CACHED_CATALOG_FILE_NAME!r} metadata file must be specified for a valid catalog'
+        )
+
+    verrors.check()
+
     for file_dir in os.listdir(catalog_path):
         complete_path = os.path.join(catalog_path, file_dir)
         if file_dir.startswith('.') or not os.path.isdir(complete_path) or file_dir in ('library', 'docs'):
