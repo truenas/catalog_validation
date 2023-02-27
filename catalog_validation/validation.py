@@ -51,16 +51,16 @@ def validate_catalog(catalog_path):
         ):
             continue
         if file_dir in MIGRATION_DIRS:
-            if all(os.listdir(migration_dir) for migration_dir in map(
+            if all(os.path.exists(migration_dir) for migration_dir in map(
                 lambda d: os.path.join(catalog_path, d), MIGRATION_DIRS
-            ) if os.path.exists(migration_dir) and os.path.isdir(MIGRATION_DIRS)):
+            )):
                 verrors.add(
                     'app_migrations', f'Both {", ".join(MIGRATION_DIRS)!r} cannot be used to specify app migrations'
                 )
             else:
                 for directory in MIGRATION_DIRS:
                     migration_dir = os.path.join(catalog_path, directory)
-                    if not os.path.exists(MIGRATION_DIRS):
+                    if not os.path.exists(migration_dir):
                         continue
                     if os.path.isdir(migration_dir):
                         try:
@@ -109,6 +109,7 @@ def validate_migrations(migration_dir):
                     f'app_migrations.{migration_file}',
                     f'Failed to validate migration file structure: {e}'
                 )
+    verrors.check()
 
 
 def validate_train_structure(train_path):
