@@ -9,6 +9,7 @@ from catalog_validation.exceptions import ValidationErrors
 
 from .features import version_supported
 from .questions_utils import normalise_questions
+from .utils import get_last_updated_date
 from .validate_utils import validate_item, validate_item_version
 
 
@@ -18,6 +19,7 @@ ITEM_KEYS = ['icon_url']
 def get_item_details(
     item_location: str, questions_context: typing.Optional[dict] = None, options: typing.Optional[dict] = None
 ) -> dict:
+    catalog_path = item_location.rstrip('/').rsplit('/', 2)[0]
     item = item_location.rsplit('/', 1)[-1]
     train = item_location.rsplit('/', 2)[-2]
 
@@ -33,6 +35,7 @@ def get_item_details(
         'latest_version': None,
         'latest_app_version': None,
         'latest_human_version': None,
+        'last_update': get_last_updated_date(catalog_path, item_location),
         'name': item,
         'title': item.capitalize(),
         'versions': {},
@@ -100,11 +103,14 @@ def get_item_details_impl(
         filter(lambda p: os.path.isdir(os.path.join(item_path, p)), os.listdir(item_path)),
         reverse=True, key=parse_version,
     ):
+        catalog_path = item_path.rstrip('/').rsplit('/', 2)[0]
+        version_path = os.path.join(item_path, version)
         item_data['versions'][version] = version_details = {
             'healthy': False,
             'supported': False,
             'healthy_error': None,
-            'location': os.path.join(item_path, version),
+            'location': version_path,
+            'last_update': get_last_updated_date(catalog_path, version_path),
             'required_features': [],
             'human_version': version,
             'version': version,

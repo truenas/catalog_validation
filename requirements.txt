@@ -1,3 +1,4 @@
+gitpython
 jsonschema==3.2.0
 kubernetes
 markdown
