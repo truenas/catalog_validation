@@ -4,6 +4,11 @@ import git
 from datetime import datetime
 from typing import Optional
 
+from catalog_validation.schema.migration_schema import MIGRATION_DIRS
+
+
+TRAIN_IGNORE_DIRS = ['library', 'docs'] + MIGRATION_DIRS
+
 
 def get_catalog_json_schema() -> dict:
     return {
