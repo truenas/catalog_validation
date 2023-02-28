@@ -3,10 +3,8 @@ import functools
 import os
 import typing
 
-from catalog_validation.utils import VALID_TRAIN_REGEX
-
 from .items_util import get_item_details, get_default_questions_context
-from .utils import TRAIN_IGNORE_DIRS, valid_train
+from .utils import valid_train
 
 
 def item_details(items: dict, location: str, questions_context: typing.Optional[dict], item_key: str) -> dict:

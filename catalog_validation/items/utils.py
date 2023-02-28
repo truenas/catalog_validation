@@ -9,7 +9,7 @@ from catalog_validation.schema.migration_schema import MIGRATION_DIRS
 from catalog_validation.utils import VALID_TRAIN_REGEX
 
 
-TRAIN_IGNORE_DIRS = ['library', 'docs'] + MIGRATION_DIRS
+TRAIN_IGNORE_DIRS = ['library', 'docs', 'ix-dev'] + MIGRATION_DIRS
 
 
 def get_catalog_json_schema() -> dict:
