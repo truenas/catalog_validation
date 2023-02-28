@@ -1,6 +1,8 @@
 import os
 import subprocess
 
+from catalog_validation.items.utils import valid_train
+
 from .exceptions import CatalogDoesNotExist
 from .utils import CatalogItem
 
@@ -15,7 +17,8 @@ def get_affected_catalog_items_with_versions(catalog_path, base_branch='master')
     )
     items_to_be_checked = []
     for file_path in filter(bool, map(str.strip, cp.stdout.decode().split('\n'))):
-        if file_path.startswith(('.', 'library/', 'docs/')):
+        train_name = file_path.split('/', 1)[0]
+        if not valid_train(train_name, os.path.join(catalog_path, train_name)):
             continue
         # Any file not being under a version directory is of no use to us and we can skip it as it's not enough
         # for us to test the catalog item in question

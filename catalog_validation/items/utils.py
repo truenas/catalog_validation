@@ -1,10 +1,12 @@
 import contextlib
 import git
+import os
 
 from datetime import datetime
 from typing import Optional
 
 from catalog_validation.schema.migration_schema import MIGRATION_DIRS
+from catalog_validation.utils import VALID_TRAIN_REGEX
 
 
 TRAIN_IGNORE_DIRS = ['library', 'docs'] + MIGRATION_DIRS
@@ -86,3 +88,9 @@ def get_last_updated_date(repo_path: str, folder_path: str) -> Optional[str]:
             return timestamp.strftime('%Y-%m-%d %H:%M:%S')
         else:
             return None
+
+
+def valid_train(train_name: str, train_location: str) -> bool:
+    return VALID_TRAIN_REGEX.match(
+        train_name
+    ) and not train_name.startswith('.') and train_name not in TRAIN_IGNORE_DIRS and os.path.isdir(train_location)

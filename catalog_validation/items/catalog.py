@@ -6,7 +6,7 @@ import typing
 from catalog_validation.utils import VALID_TRAIN_REGEX
 
 from .items_util import get_item_details, get_default_questions_context
-from .utils import TRAIN_IGNORE_DIRS
+from .utils import TRAIN_IGNORE_DIRS, valid_train
 
 
 def item_details(items: dict, location: str, questions_context: typing.Optional[dict], item_key: str) -> dict:
@@ -23,13 +23,7 @@ def retrieve_train_names(location: str, all_trains=True, trains_filter=None) -> 
     train_names = []
     trains_filter = trains_filter or []
     for train in os.listdir(location):
-        if (
-            not (all_trains or train in trains_filter) or not os.path.isdir(
-                os.path.join(location, train)
-            ) or train.startswith('.') or train in TRAIN_IGNORE_DIRS or not VALID_TRAIN_REGEX.match(
-                train
-            )
-        ):
+        if not (all_trains or train in trains_filter) or not valid_train(train, os.path.join(location, train)):
             continue
         train_names.append(train)
     return train_names
