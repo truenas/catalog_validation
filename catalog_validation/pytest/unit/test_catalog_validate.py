@@ -3,7 +3,8 @@ import pytest
 from catalog_validation.exceptions import ValidationErrors
 from catalog_validation.utils import WANTED_FILES_IN_ITEM_VERSION
 from catalog_validation.validation import (
-    validate_train_structure, validate_questions_yaml, validate_catalog_item, validate_catalog_item_version,
+    validate_train_structure, validate_questions_yaml, validate_catalog_item,
+    validate_catalog_item_version, validate_variable_uniqueness,
 )
 
 
@@ -235,3 +236,132 @@ def test_validate_catalog_item_version(mocker, chart_yaml, should_work):
                 '/mnt/mypool/ix-applications/catalogs/github_com_truenas_charts_git_master/charts/storj/1.0.4',
                 'charts.storj.versions.1.0.4'
             )
+
+
+@pytest.mark.parametrize('data,schema,should_work', [
+    ([
+         {
+             'variable': 'enablePlexPass',
+             'label': 'Use PlexPass',
+             'group': 'Plex Configuration',
+             'schema': {
+                 'type': 'boolean',
+                 'default': False
+             }
+         },
+         {
+             'variable': 'dnsConfig',
+             'label': 'DNS Configuration',
+             'group': 'Advanced DNS Settings',
+             'schema': {
+                 'type': 'dict',
+                 'attrs': []
+             }
+         },
+     ], 'plex.questions', True),
+    ([
+         {
+             'variable': 'enablePlexPass',
+             'label': 'Use PlexPass',
+             'group': 'Plex Configuration',
+             'schema': {
+                 'type': 'boolean',
+                 'default': False
+             }
+         },
+         {
+             'variable': 'enablePlexPass',
+             'label': 'Use PlexPass',
+             'group': 'Plex Configuration',
+             'schema': {
+                 'type': 'boolean',
+                 'default': False
+             }
+         },
+     ], 'plex.questions', False),
+    ([
+         {
+             'variable': 'enablePlexPass',
+             'label': 'Use PlexPass',
+             'group': 'Plex Configuration',
+             'schema': {
+                 'type': 'boolean',
+                 'default': False
+             }
+         },
+         {
+             'variable': 'hostPathEnabled',
+             'label': 'Enable Host Path for Plex Transcode Volume',
+             'type': 'boolean',
+             'default': False,
+             'show_subquestions_if': False,
+             'subquestions': [
+                 {
+                     'variable': 'hostPath',
+                     'label': 'Host Path for Plex Transcode Volume',
+                     'schema': {
+                         'type': 'hostpath',
+                         'required': True,
+                         '$ref': [
+                             'validations/lockedHostPath'
+                         ]
+                     }
+                 },
+             ]
+         }
+     ], 'plex.questions', True),
+    ([
+         {
+             'variable': 'enablePlexPass',
+             'label': 'Use PlexPass',
+             'group': 'Plex Configuration',
+             'schema': {
+                 'type': 'boolean',
+                 'default': False
+             }
+         },
+         {
+             'variable': 'mountPath',
+             'label': 'Plex Transcode Mount Path',
+             'description': 'Path where the volume will be mounted inside the pod',
+             'schema': {
+                 'type': 'path',
+             }
+         },
+         {
+             'variable': 'hostPathEnabled',
+             'label': 'Enable Host Path for Plex Transcode Volume',
+             'type': 'boolean',
+             'default': False,
+             'show_subquestions_if': False,
+             'subquestions': [
+                 {
+                     'variable': 'hostPath',
+                     'label': 'Host Path for Plex Transcode Volume',
+                     'schema': {
+                         'type': 'hostpath',
+                         'required': True,
+                         '$ref': [
+                             'validations/lockedHostPath'
+                         ]
+                     }
+                 },
+                 {
+                     'variable': 'mountPath',
+                     'label': 'Plex Transcode Mount Path',
+                     'description': 'Path where the volume will be mounted inside the pod',
+                     'schema': {
+                         'type': 'path',
+                     }
+                 },
+             ]
+         }
+     ], 'plex.questions', False),
+])
+def test_validate_variable_uniqueness(data, schema, should_work):
+    verrors = ValidationErrors()
+    if should_work:
+        assert validate_variable_uniqueness(data, schema, verrors) is None
+    else:
+        with pytest.raises(ValidationErrors):
+            validate_variable_uniqueness(data, schema, verrors)

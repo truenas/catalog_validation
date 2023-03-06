@@ -288,6 +288,7 @@ def validate_questions_yaml(questions_yaml_path, schema):
                 verrors, error_schema
             )
 
+    validate_variable_uniqueness(questions_config['questions'], f'{schema}.questions', verrors)
     for index, question in enumerate(questions_config['questions']):
         validate_question(question, f'{schema}.questions.{index}', verrors, (('group', str),))
         if question.get('group') and question['group'] not in groups:
@@ -304,6 +305,28 @@ def validate_questions_yaml(questions_yaml_path, schema):
                 f'{schema}.{CUSTOM_PORTAL_GROUP_KEY}',
                 'Specified group not declared under "groups"'
             )
+
+    verrors.check()
+
+
+def validate_variable_uniqueness(data, schema, verrors):
+    variables = []
+    for index, question in enumerate(data):
+        if question['variable'] in variables:
+            verrors.add(
+                f'{schema}.{index}', f'Variable name {question["variable"]!r} has been used again which is not allowed'
+            )
+        else:
+            variables.append(question['variable'])
+            sub_questions = question.get('subquestions') or []
+            for sub_index, sub_question in enumerate(sub_questions):
+                if sub_question['variable'] in variables:
+                    verrors.add(
+                        f'{schema}.{index}.subquestions.{sub_index}',
+                        f'Variable name {sub_question["variable"]!r} has been used again which is not allowed'
+                    )
+                else:
+                    variables.append(sub_question['variable'])
 
     verrors.check()
 
@@ -344,6 +367,9 @@ def validate_question(question_data, schema, verrors, validate_top_level_attrs=N
     ):
         if not (condition and type(schema_data.get(key)) == list):
             continue
+
+        if variable_type == 'dict':
+            validate_variable_uniqueness(schema_data[key], f'{schema}.{schema_str}', verrors)
 
         for index, item in enumerate(schema_data[key]):
             validate_question(item, f'{schema_str}.{index}', verrors)
