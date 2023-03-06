@@ -12,7 +12,7 @@ from .items.ix_values_utils import validate_ix_values_schema
 from .items.questions_utils import (
     CUSTOM_PORTALS_KEY, CUSTOM_PORTALS_ENABLE_KEY, CUSTOM_PORTAL_GROUP_KEY,
 )
-from .items.utils import get_catalog_json_schema, TRAIN_IGNORE_DIRS
+from .items.utils import get_catalog_json_schema, RECOMMENDED_APPS_FILENAME, RECOMMENDED_APPS_SCHEMA, TRAIN_IGNORE_DIRS
 from .schema.migration_schema import APP_MIGRATION_SCHEMA, MIGRATION_DIRS, RE_MIGRATION_NAME, RE_MIGRATION_NAME_STR
 from .schema.variable import Variable
 from .utils import CACHED_CATALOG_FILE_NAME, validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
@@ -43,6 +43,8 @@ def validate_catalog(catalog_path):
             )
 
     verrors.check()
+
+    validate_recommended_apps_file(catalog_path)
 
     for file_dir in os.listdir(catalog_path):
         complete_path = os.path.join(catalog_path, file_dir)
@@ -86,6 +88,22 @@ def validate_catalog(catalog_path):
                 future.result()
             except ValidationErrors as e:
                 verrors.extend(e)
+
+    verrors.check()
+
+
+def validate_recommended_apps_file(catalog_location: str) -> None:
+    verrors = ValidationErrors()
+    try:
+        with open(os.path.join(catalog_location, RECOMMENDED_APPS_FILENAME), 'r') as f:
+            data = yaml.safe_load(f.read())
+        json_schema_validate(data, RECOMMENDED_APPS_SCHEMA)
+    except FileNotFoundError:
+        return
+    except yaml.YAMLError:
+        verrors.add(RECOMMENDED_APPS_FILENAME, 'Must be a valid yaml file')
+    except JsonValidationError as e:
+        verrors.add(RECOMMENDED_APPS_FILENAME, f'Invalid format specified: {e}')
 
     verrors.check()
 
