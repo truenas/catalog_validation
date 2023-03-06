@@ -2,9 +2,12 @@ import concurrent.futures
 import functools
 import os
 import typing
+import yaml
+
+from jsonschema import validate as json_schema_validate, ValidationError as JsonValidationError
 
 from .items_util import get_item_details, get_default_questions_context
-from .utils import valid_train
+from .utils import RECOMMENDED_APPS_FILENAME, RECOMMENDED_APPS_SCHEMA, valid_train
 
 
 def item_details(items: dict, location: str, questions_context: typing.Optional[dict], item_key: str) -> dict:
@@ -70,3 +73,14 @@ def retrieve_trains_data(
                 unhealthy_apps.add(f'{item} ({train} train)')
 
     return trains, unhealthy_apps
+
+
+def retrieve_recommended_apps(catalog_location: str) -> typing.Dict[str, list]:
+    try:
+        with open(os.path.join(catalog_location, RECOMMENDED_APPS_FILENAME), 'r') as f:
+            data = yaml.safe_load(f.read())
+            json_schema_validate(data, RECOMMENDED_APPS_SCHEMA)
+    except (FileNotFoundError, JsonValidationError, yaml.YAMLError):
+        return {}
+    else:
+        return data

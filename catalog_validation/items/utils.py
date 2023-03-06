@@ -9,6 +9,16 @@ from catalog_validation.schema.migration_schema import MIGRATION_DIRS
 from catalog_validation.utils import VALID_TRAIN_REGEX
 
 
+RECOMMENDED_APPS_FILENAME = 'recommended_apps.yaml'
+RECOMMENDED_APPS_SCHEMA = {
+    'type': 'object',
+    'patternProperties': {
+        '.*': {
+            'type': 'array',
+            'items': {'type': 'string'},
+        }
+    },
+}
 TRAIN_IGNORE_DIRS = ['library', 'docs', 'ix-dev'] + MIGRATION_DIRS
 
 
