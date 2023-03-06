@@ -12,7 +12,7 @@ from .items.ix_values_utils import validate_ix_values_schema
 from .items.questions_utils import (
     CUSTOM_PORTALS_KEY, CUSTOM_PORTALS_ENABLE_KEY, CUSTOM_PORTAL_GROUP_KEY,
 )
-from .items.utils import get_catalog_json_schema
+from .items.utils import get_catalog_json_schema, TRAIN_IGNORE_DIRS
 from .schema.migration_schema import APP_MIGRATION_SCHEMA, MIGRATION_DIRS, RE_MIGRATION_NAME, RE_MIGRATION_NAME_STR
 from .schema.variable import Variable
 from .utils import CACHED_CATALOG_FILE_NAME, validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
@@ -47,7 +47,7 @@ def validate_catalog(catalog_path):
     for file_dir in os.listdir(catalog_path):
         complete_path = os.path.join(catalog_path, file_dir)
         if file_dir not in MIGRATION_DIRS and (
-            file_dir.startswith('.') or not os.path.isdir(complete_path) or file_dir in ('library', 'docs')
+            file_dir.startswith('.') or not os.path.isdir(complete_path) or file_dir in TRAIN_IGNORE_DIRS
         ):
             continue
         if file_dir in MIGRATION_DIRS:
