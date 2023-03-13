@@ -37,6 +37,7 @@ def get_item_details(
         'latest_human_version': None,
         'last_update': get_last_updated_date(catalog_path, item_location),
         'name': item,
+        'recommended': False,
         'title': item.capitalize(),
         'versions': {},
     }
