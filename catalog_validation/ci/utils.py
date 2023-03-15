@@ -5,6 +5,9 @@ from catalog_validation.items.utils import DEVELOPMENT_DIR
 from semantic_version import Version
 
 
+DEV_DIRECTORY_RELATIVE_PATH: str = os.path.join('library', DEVELOPMENT_DIR)
+
+
 def get_app_version(app_path: str) -> str:
     # This assumes that file exists and version is specified and is good
     with open(os.path.join(app_path, 'Chart.yaml'), 'r') as f:
@@ -12,7 +15,7 @@ def get_app_version(app_path: str) -> str:
 
 
 def get_ci_development_directory(catalog_path: str) -> str:
-    return os.path.join(catalog_path, 'library', DEVELOPMENT_DIR)
+    return os.path.join(catalog_path, DEV_DIRECTORY_RELATIVE_PATH)
 
 
 def version_has_been_bumped(app_path: str, new_version: str) -> bool:
