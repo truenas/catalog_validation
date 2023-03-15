@@ -6,8 +6,16 @@ from catalog_validation.validation import validate_catalog_item_version, validat
 from .utils import get_app_version, get_ci_development_directory, version_has_been_bumped
 
 
-def validate_dev_directory_structure(catalog_path: str) -> None:
+def validate_dev_directory_structure(catalog_path: str, to_check_apps: dict) -> None:
     verrors = ValidationErrors()
+    dev_directory = get_ci_development_directory(catalog_path)
+    for train_name in filter(
+        lambda name: name in to_check_apps and os.path.isdir(os.path.join(dev_directory, name)),
+        os.listdir(dev_directory)
+    ):
+        validate_train(
+            catalog_path, os.path.join(dev_directory, train_name), f'dev.{train_name}', to_check_apps[train_name]
+        )
     verrors.check()
 
 
