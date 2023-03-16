@@ -3,7 +3,7 @@ import os
 from catalog_validation.exceptions import ValidationErrors
 from catalog_validation.validation import validate_catalog_item_version, validate_chart_version
 
-from .utils import get_app_version, get_ci_development_directory, version_has_been_bumped
+from .utils import get_app_version, get_ci_development_directory, REQUIRED_METADATA_FILES, version_has_been_bumped
 
 
 def validate_dev_directory_structure(catalog_path: str, to_check_apps: dict) -> None:
@@ -55,3 +55,15 @@ def validate_app(app_dir_path: str, schema: str) -> None:
     verrors.check()
 
     validate_catalog_item_version(app_dir_path, schema, get_app_version(app_dir_path), app_name)
+
+    required_files = set(REQUIRED_METADATA_FILES)
+    available_files = set(
+        f for f in filter(lambda f: os.path.isfile(os.path.join(app_dir_path, f)), os.listdir(app_dir_path))
+    )
+    if missing_files := required_files - available_files:
+        verrors.add(
+            f'{schema}.required_files',
+            f'{", ".join(missing_files)!r} file(s) must be specified'
+        )
+
+    verrors.check()

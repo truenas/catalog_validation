@@ -6,6 +6,8 @@ from semantic_version import Version
 
 
 DEV_DIRECTORY_RELATIVE_PATH: str = os.path.join('library', DEVELOPMENT_DIR)
+OPTIONAL_METADATA_FILES = ['upgrade_info.json', 'upgrade_strategy']
+REQUIRED_METADATA_FILES = ['item.yaml']
 
 
 def get_app_version(app_path: str) -> str:
