@@ -9,6 +9,7 @@ from catalog_validation.schema.migration_schema import MIGRATION_DIRS
 from catalog_validation.utils import VALID_TRAIN_REGEX
 
 
+DEVELOPMENT_DIR = 'ix-dev'
 RECOMMENDED_APPS_FILENAME = 'recommended_apps.yaml'
 RECOMMENDED_APPS_SCHEMA = {
     'type': 'object',
@@ -19,7 +20,7 @@ RECOMMENDED_APPS_SCHEMA = {
         }
     },
 }
-TRAIN_IGNORE_DIRS = ['library', 'docs', 'ix-dev'] + MIGRATION_DIRS
+TRAIN_IGNORE_DIRS = ['library', 'docs', DEVELOPMENT_DIR] + MIGRATION_DIRS
 
 
 def get_catalog_json_schema() -> dict:

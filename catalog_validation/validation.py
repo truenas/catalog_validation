@@ -6,6 +6,7 @@ import yaml
 
 from semantic_version import Version
 from jsonschema import validate as json_schema_validate, ValidationError as JsonValidationError
+from typing import Optional
 
 from .exceptions import CatalogDoesNotExist, ValidationErrors
 from .items.ix_values_utils import validate_ix_values_schema
@@ -16,6 +17,7 @@ from .items.utils import get_catalog_json_schema, RECOMMENDED_APPS_FILENAME, REC
 from .schema.migration_schema import APP_MIGRATION_SCHEMA, MIGRATION_DIRS, RE_MIGRATION_NAME, RE_MIGRATION_NAME_STR
 from .schema.variable import Variable
 from .utils import CACHED_CATALOG_FILE_NAME, validate_key_value_types, VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
+from .validation_utils import validate_chart_version
 
 
 def validate_catalog(catalog_path):
@@ -189,10 +191,12 @@ def validate_catalog_item(catalog_item_path, schema, validate_versions=True):
     verrors.check()
 
 
-def validate_catalog_item_version(version_path, schema):
+def validate_catalog_item_version(
+    version_path: str, schema: str, version_name: Optional[str] = None, item_name: Optional[str] = None
+):
     verrors = ValidationErrors()
-    version_name = os.path.basename(version_path)
-    item_name = version_path.split('/')[-2]
+    version_name = version_name or os.path.basename(version_path)
+    item_name = item_name or version_path.split('/')[-2]
     try:
         Version(version_name)
     except ValueError:
@@ -205,24 +209,7 @@ def validate_catalog_item_version(version_path, schema):
         verrors.add(f'{schema}.required_files', f'Missing {", ".join(files_diff)} required configuration files.')
 
     chart_version_path = os.path.join(version_path, 'Chart.yaml')
-    if os.path.exists(chart_version_path):
-        with open(chart_version_path, 'r') as f:
-            try:
-                chart_config = yaml.safe_load(f.read())
-            except yaml.YAMLError:
-                verrors.add(schema, 'Must be a valid yaml file')
-            else:
-                if not isinstance(chart_config, dict):
-                    verrors.add(schema, 'Must be a dictionary')
-                else:
-                    if chart_config.get('name') != item_name:
-                        verrors.add(f'{schema}.item_name', 'Item name not correctly set in "Chart.yaml".')
-
-                    if chart_config.get('version') != version_name:
-                        verrors.add(
-                            f'{schema}.version',
-                            'Configured version in "Chart.yaml" does not match version directory name.'
-                        )
+    validate_chart_version(verrors, chart_version_path, schema, item_name, version_name)
 
     questions_path = os.path.join(version_path, 'questions.yaml')
     if os.path.exists(questions_path):
