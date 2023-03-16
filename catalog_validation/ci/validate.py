@@ -9,6 +9,9 @@ from .utils import get_app_version, get_ci_development_directory, REQUIRED_METAD
 def validate_dev_directory_structure(catalog_path: str, to_check_apps: dict) -> None:
     verrors = ValidationErrors()
     dev_directory = get_ci_development_directory(catalog_path)
+    if not os.path.exists(dev_directory):
+        return
+
     for train_name in filter(
         lambda name: name in to_check_apps and os.path.isdir(os.path.join(dev_directory, name)),
         os.listdir(dev_directory)
