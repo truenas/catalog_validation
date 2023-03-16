@@ -33,7 +33,7 @@ def get_apps_to_publish(catalog_path: str) -> dict:
 
         for app_name in os.listdir(train_path):
             app_path = os.path.join(train_path, app_name)
-            if not os.path.isfile(app_path):
+            if not os.path.isdir(app_path):
                 continue
 
             app_current_version = get_app_version(app_path)
