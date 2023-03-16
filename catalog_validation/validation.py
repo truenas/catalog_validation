@@ -191,10 +191,12 @@ def validate_catalog_item(catalog_item_path, schema, validate_versions=True):
     verrors.check()
 
 
-def validate_catalog_item_version(version_path: str, schema: str, version_name: Optional[str] = None):
+def validate_catalog_item_version(
+    version_path: str, schema: str, version_name: Optional[str] = None, item_name: Optional[str] = None
+):
     verrors = ValidationErrors()
     version_name = version_name or os.path.basename(version_path)
-    item_name = version_path.split('/')[-2]
+    item_name = item_name or version_path.split('/')[-2]
     try:
         Version(version_name)
     except ValueError:
