@@ -69,6 +69,11 @@ def publish_updated_apps(catalog_path: str) -> None:
                 with contextlib.suppress(OSError):
                     os.unlink(os.path.join(publish_app_version_path, file_name))
 
+            ix_values_path = os.path.join(publish_app_version_path, 'ix_values.yaml')
+            values_path = os.path.join(publish_app_version_path, 'values.yaml')
+            if not os.path.exists(ix_values_path) and os.path.exists(values_path):
+                shutil.move(values_path, ix_values_path)
+
             for version in os.listdir(publish_app_path):
                 version_path = os.path.join(publish_app_path, version)
                 if not os.path.isdir(version_path):
