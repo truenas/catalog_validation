@@ -14,7 +14,6 @@ setup(
     entry_points={
         'console_scripts': [
             'catalog_validate = catalog_validation.scripts.catalog_validate:main',
-            'charts_validate = catalog_validation.scripts.charts_validate:main',
             'catalog_update = catalog_validation.scripts.catalog_update:main',
             'dev_charts_validate = catalog_validation.scripts.dev_apps_validate:main',
         ],
