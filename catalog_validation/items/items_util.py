@@ -64,19 +64,22 @@ def get_item_details(
         if not v['healthy']:
             unhealthy_versions.append(k)
         else:
+            chart_metadata = v['chart_metadata']
             if not item_data['app_readme']:
                 item_data['app_readme'] = v['app_readme']
             if not item_data['latest_version']:
                 item_data['latest_version'] = k
-                item_data['latest_app_version'] = v['chart_metadata'].get('appVersion')
+                item_data['latest_app_version'] = chart_metadata.get('appVersion')
                 item_data['latest_human_version'] = ''
                 if item_data['latest_app_version']:
                     item_data['latest_human_version'] = f'{item_data["latest_app_version"]}_'
                 item_data['latest_human_version'] += k
-            if not item_data['description'] and v['chart_metadata'].get('description'):
+            if not item_data['description'] and chart_metadata.get('description'):
                 item_data['description'] = v['chart_metadata']['description']
-            if item_data['title'] == item_data['name'].capitalize() and v['chart_metadata'].get('title'):
-                item_data['title'] = v['chart_metadata']['title']
+            if item_data['title'] == item_data['name'].capitalize() and chart_metadata.get(
+                'annotations', {}
+            ).get('title'):
+                item_data['title'] = chart_metadata['annotations']['title']
 
     if unhealthy_versions:
         item_data['healthy_error'] = f'Errors were found with {", ".join(unhealthy_versions)} version(s)'
