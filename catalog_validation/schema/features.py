@@ -1,6 +1,6 @@
 from catalog_validation.exceptions import ValidationErrors
 
-from .schema_gen import DictSchema, IntegerSchema, StringSchema
+from .schema_gen import DictSchema, IntegerSchema, ListSchema, StringSchema
 
 
 class Feature:
@@ -135,8 +135,27 @@ class ContainerImageFeature(Feature):
                 verrors.add(f'{schema_str}.attrs', f'Variable {check_attr!r} must be of string type.')
 
 
+class DefinitionACLFeature(Feature):
+
+    NAME = 'definitions/acl'
+    VALID_SCHEMAS = [DictSchema]
+
+    def _validate(self, verrors, schema_obj, schema_str):
+        attrs = schema_obj.attrs
+        for check_attr, attr_schema in (
+            ('path', StringSchema),
+            ('entries', ListSchema),
+            ('options', DictSchema),
+        ):
+            if check_attr not in attrs:
+                verrors.add(f'{schema_str}.attrs', f'Variable {check_attr!r} must be specified.')
+            elif not isinstance(attrs[attrs.index(check_attr)].schema, attr_schema):
+                verrors.add(f'{schema_str}.attrs', f'Variable {check_attr!r} must be of {attr_schema.__name__} type.')
+
+
 FEATURES = [
     IXVolumeFeature(),
+    DefinitionACLFeature(),
     DefinitionInterfaceFeature(),
     DefinitionGPUConfigurationFeature(),
     DefinitionTimezoneFeature(),
