@@ -1,6 +1,6 @@
 from catalog_validation.exceptions import ValidationErrors
 
-from .schema_gen import DictSchema, IntegerSchema, ListSchema, StringSchema
+from .schema_gen import DictSchema, IntegerSchema, StringSchema
 
 
 class Feature:
@@ -44,6 +44,9 @@ class IXVolumeFeature(Feature):
             verrors.add(f'{schema_str}.attrs', 'Variable "datasetName" must be specified.')
         elif not isinstance(attrs[attrs.index('datasetName')].schema, StringSchema):
             verrors.add(f'{schema_str}.attrs', 'Variable "datasetName" must be of string type.')
+
+        if 'aclEntries' in attrs and not isinstance(attrs[attrs.index('aclEntries')].schema, DictSchema):
+            verrors.add(f'{schema_str}.attrs', 'Variable "aclEntries" must be of dict type.')
 
         if 'properties' in attrs:
             index = attrs.index('properties')
@@ -135,27 +138,15 @@ class ContainerImageFeature(Feature):
                 verrors.add(f'{schema_str}.attrs', f'Variable {check_attr!r} must be of string type.')
 
 
-class DefinitionACLFeature(Feature):
+class ACLFeature(Feature):
 
-    NAME = 'definitions/acl'
+    NAME = 'normalize/acl'
     VALID_SCHEMAS = [DictSchema]
-
-    def _validate(self, verrors, schema_obj, schema_str):
-        attrs = schema_obj.attrs
-        for check_attr, attr_schema in (
-            ('path', StringSchema),
-            ('entries', ListSchema),
-            ('options', DictSchema),
-        ):
-            if check_attr not in attrs:
-                verrors.add(f'{schema_str}.attrs', f'Variable {check_attr!r} must be specified.')
-            elif not isinstance(attrs[attrs.index(check_attr)].schema, attr_schema):
-                verrors.add(f'{schema_str}.attrs', f'Variable {check_attr!r} must be of {attr_schema.__name__} type.')
 
 
 FEATURES = [
+    ACLFeature(),
     IXVolumeFeature(),
-    DefinitionACLFeature(),
     DefinitionInterfaceFeature(),
     DefinitionGPUConfigurationFeature(),
     DefinitionTimezoneFeature(),
