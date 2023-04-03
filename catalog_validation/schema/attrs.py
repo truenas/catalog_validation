@@ -129,7 +129,7 @@ class StringSchema(Schema):
     DEFAULT_TYPE = 'string'
 
     def __init__(self, data):
-        self.min_length = self.max_length = self.enum = self.private = self.valid_chars = None
+        self.min_length = self.max_length = self.enum = self.private = self.valid_chars = self.valid_chars_error = None
         super().__init__(data=data)
 
     def json_schema(self):
@@ -146,6 +146,9 @@ class StringSchema(Schema):
             },
             'valid_chars': {
                 'type': 'string',
+            },
+            'valid_chars_error': {
+                'type': 'string'
             },
         })
         return schema
