@@ -57,6 +57,9 @@ def get_catalog_json_schema() -> dict:
                             'healthy_error': {
                                 'type': ['string', 'null'],
                             },
+                            'last_update': {
+                                'type': 'string',
+                            },
                             'latest_version': {
                                 'type': 'string',
                             },
@@ -79,7 +82,8 @@ def get_catalog_json_schema() -> dict:
                         },
                         'required': [
                             'name', 'categories', 'location', 'healthy', 'icon_url',
-                            'latest_version', 'latest_app_version', 'latest_human_version'
+                            'latest_version', 'latest_app_version', 'latest_human_version',
+                            'last_update', 'recommended', 'healthy_error',
                         ],
                     }
                 }

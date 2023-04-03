@@ -16,6 +16,25 @@ from .validate_utils import validate_item, validate_item_version
 ITEM_KEYS = ['icon_url']
 
 
+def get_item_details_base() -> dict:
+    return {
+        'app_readme': None,
+        'categories': [],
+        'description': None,
+        'healthy': False,  # healthy means that each version the item hosts is valid and healthy
+        'healthy_error': None,  # An error string explaining why the item is not healthy
+        'location': None,
+        'latest_version': None,
+        'latest_app_version': None,
+        'latest_human_version': None,
+        'last_update': None,
+        'name': None,
+        'recommended': False,
+        'title': None,
+        'versions': {},
+    }
+
+
 def get_item_details(
     item_location: str, questions_context: typing.Optional[dict] = None, options: typing.Optional[dict] = None
 ) -> dict:
@@ -25,22 +44,13 @@ def get_item_details(
 
     options = options or {}
     retrieve_versions = options.get('retrieve_versions', True)
-    item_data = {
-        'app_readme': None,
-        'categories': [],
-        'description': None,
-        'healthy': False,  # healthy means that each version the item hosts is valid and healthy
-        'healthy_error': None,  # An error string explaining why the item is not healthy
+    item_data = get_item_details_base()
+    item_data.update({
         'location': item_location,
-        'latest_version': None,
-        'latest_app_version': None,
-        'latest_human_version': None,
         'last_update': get_last_updated_date(catalog_path, item_location),
         'name': item,
-        'recommended': False,
         'title': item.capitalize(),
-        'versions': {},
-    }
+    })
 
     schema = f'{train}.{item}'
     try:
