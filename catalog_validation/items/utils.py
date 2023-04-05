@@ -58,7 +58,7 @@ def get_catalog_json_schema() -> dict:
                                 'type': ['string', 'null'],
                             },
                             'last_update': {
-                                'type': 'string',
+                                'type': ['string', 'null'],
                             },
                             'latest_version': {
                                 'type': 'string',
