@@ -1,6 +1,6 @@
 import itertools
 
-from .utils import ACL_QUESTION
+from .utils import ACL_QUESTION, IX_VOLUMES_ACL_QUESTION
 
 
 CUSTOM_PORTALS_KEY = 'iXPortals'
@@ -158,7 +158,7 @@ def normalise_question(question: dict, version_data: dict, context: dict) -> Non
                 # get index of aclEntries from attrs
                 acl_index = next(i for i, v in enumerate(schema['attrs']) if v['variable'] == 'aclEntries')
                 # insert acl question before aclEntries
-                schema['attrs'][acl_index]['schema']['attrs'] = ACL_QUESTION
+                schema['attrs'][acl_index]['schema']['attrs'] = IX_VOLUMES_ACL_QUESTION
 
     schema.update(data)
 

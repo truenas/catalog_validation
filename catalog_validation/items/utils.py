@@ -86,6 +86,19 @@ ACL_QUESTION = [
     }
 ]
 
+IX_VOLUMES_ACL_QUESTION = [
+    {
+        'variable': 'path',
+        'label': 'Path',
+        'description': 'Path to perform ACL',
+        'schema': {
+            'type': 'string',
+            'hidden': True
+        }
+    },
+    ACL_QUESTION[1]
+]
+
 
 def get_catalog_json_schema() -> dict:
     return {
@@ -122,7 +135,7 @@ def get_catalog_json_schema() -> dict:
                                 'type': ['string', 'null'],
                             },
                             'last_update': {
-                                'type': 'string',
+                                'type': ['string', 'null'],
                             },
                             'latest_version': {
                                 'type': 'string',
