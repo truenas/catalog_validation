@@ -45,6 +45,9 @@ class IXVolumeFeature(Feature):
         elif not isinstance(attrs[attrs.index('datasetName')].schema, StringSchema):
             verrors.add(f'{schema_str}.attrs', 'Variable "datasetName" must be of string type.')
 
+        if 'aclEntries' in attrs and not isinstance(attrs[attrs.index('aclEntries')].schema, DictSchema):
+            verrors.add(f'{schema_str}.attrs', 'Variable "aclEntries" must be of dict type.')
+
         if 'properties' in attrs:
             index = attrs.index('properties')
             properties = attrs[index]
@@ -135,7 +138,14 @@ class ContainerImageFeature(Feature):
                 verrors.add(f'{schema_str}.attrs', f'Variable {check_attr!r} must be of string type.')
 
 
+class ACLFeature(Feature):
+
+    NAME = 'normalize/acl'
+    VALID_SCHEMAS = [DictSchema]
+
+
 FEATURES = [
+    ACLFeature(),
     IXVolumeFeature(),
     DefinitionInterfaceFeature(),
     DefinitionGPUConfigurationFeature(),

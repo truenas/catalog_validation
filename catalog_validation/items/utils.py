@@ -23,6 +23,83 @@ RECOMMENDED_APPS_SCHEMA = {
 TRAIN_IGNORE_DIRS = ['library', 'docs', DEVELOPMENT_DIR] + MIGRATION_DIRS
 
 
+ACL_QUESTION = [
+    {
+        'variable': 'path',
+        'label': 'Path',
+        'description': 'Path to perform ACL',
+        'schema': {
+            'type': 'string',
+            'required': True,
+            'empty': False,
+        }
+    },
+    {
+        'variable': 'entries',
+        'label': 'ACL Entries',
+        'description': 'ACL Entries',
+        'schema': {
+            'type': 'list',
+            'items': [{
+                'variable': 'aclEntry',
+                'label': 'ACL Entry',
+                'schema': {
+                    'type': 'dict',
+                    'attrs': [
+                        {
+                            'variable': 'id_type',
+                            'label': 'ID Type',
+                            'schema': {
+                                'type': 'string',
+                                'enum': [
+                                    {'value': 'USER', 'description': 'Entry is for a USER'},
+                                    {'value': 'GROUP', 'description': 'Entry is for a GROUP'},
+                                ],
+                                'default': 'USER',
+                            }
+                        },
+                        {
+                            'variable': 'id',
+                            'label': 'ID',
+                            'schema': {
+                                'type': 'int',
+                                'required': True,
+                                'min': 0,
+                            }
+                        },
+                        {
+                            'variable': 'access',
+                            'label': 'Access',
+                            'schema': {
+                                'type': 'string',
+                                'enum': [
+                                    {'value': 'READ', 'description': 'Read Access'},
+                                    {'value': 'MODIFY', 'description': 'Modify Access'},
+                                    {'value': 'FULL_CONTROL', 'description': 'FULL_CONTROL Access'},
+                                ],
+                            }
+                        }
+                    ],
+                }
+            }]
+        }
+    }
+]
+
+IX_VOLUMES_ACL_QUESTION = [
+    {
+        'variable': 'path',
+        'label': 'Path',
+        'description': 'Path to perform ACL',
+        'schema': {
+            'type': 'string',
+            'hidden': True
+        }
+    },
+    ACL_QUESTION[1]
+]
+
+
 def get_catalog_json_schema() -> dict:
     return {
         'type': 'object',
