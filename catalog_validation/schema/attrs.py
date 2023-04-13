@@ -48,6 +48,10 @@ class Schema:
 
         if '$ref' in self._schema_data:
             for index, ref in enumerate(self._schema_data['$ref']):
+                if not isinstance(ref, str):
+                    verrors.add(f'{schema}.$ref.{index}', 'Must be a string')
+                    continue
+
                 feature_obj = get_feature(ref)
                 if not feature_obj:
                     continue
