@@ -192,7 +192,8 @@ def validate_catalog_item(catalog_item_path, schema, validate_versions=True):
 
 
 def validate_catalog_item_version(
-    version_path: str, schema: str, version_name: Optional[str] = None, item_name: Optional[str] = None
+    version_path: str, schema: str, version_name: Optional[str] = None, item_name: Optional[str] = None,
+    validate_values: bool = False,
 ):
     verrors = ValidationErrors()
     version_name = version_name or os.path.basename(version_path)
@@ -218,12 +219,13 @@ def validate_catalog_item_version(
         except ValidationErrors as v:
             verrors.extend(v)
 
-    ix_values_yaml_path = os.path.join(version_path, 'ix_values.yaml')
-    if os.path.exists(ix_values_yaml_path):
-        try:
-            validate_ix_values_yaml(ix_values_yaml_path, f'{schema}.ix_values')
-        except ValidationErrors as v:
-            verrors.extend(v)
+    for values_file in ['ix_values.yaml'] + (['values.yaml'] if validate_values else []):
+        values_path = os.path.join(version_path, values_file)
+        if os.path.exists(values_path):
+            try:
+                validate_ix_values_yaml(values_path, f'{schema}.values_configuration')
+            except ValidationErrors as v:
+                verrors.extend(v)
 
     verrors.check()
 
@@ -237,12 +239,18 @@ def validate_ix_values_yaml(ix_values_yaml_path, schema):
         except yaml.YAMLError:
             verrors.add(schema, 'Must be a valid yaml file')
 
+        verrors.check()
+
+    if isinstance(ix_values, dict):
         portals = ix_values.get(CUSTOM_PORTALS_KEY)
         if portals:
             try:
                 validate_ix_values_schema(schema, portals)
             except ValidationErrors as ve:
                 verrors.extend(ve)
+    else:
+        verrors.add(schema, 'Must be a dictionary')
+
     verrors.check()
 
 

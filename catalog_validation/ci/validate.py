@@ -57,7 +57,7 @@ def validate_app(app_dir_path: str, schema: str) -> None:
     verrors = validate_chart_version(ValidationErrors(), chart_version_path, schema, app_name)
     verrors.check()
 
-    validate_catalog_item_version(app_dir_path, schema, get_app_version(app_dir_path), app_name)
+    validate_catalog_item_version(app_dir_path, schema, get_app_version(app_dir_path), app_name, True)
 
     required_files = set(REQUIRED_METADATA_FILES)
     available_files = set(
