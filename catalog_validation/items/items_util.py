@@ -32,6 +32,7 @@ def get_item_details_base() -> dict:
         'recommended': False,
         'title': None,
         'versions': {},
+        'maintainers': [],
     }
 
 
@@ -77,6 +78,8 @@ def get_item_details(
             chart_metadata = v['chart_metadata']
             if not item_data['app_readme']:
                 item_data['app_readme'] = v['app_readme']
+            if not item_data['maintainers'] and chart_metadata.get('maintainers'):
+                item_data['maintainers'] = chart_metadata['maintainers']
             if not item_data['latest_version']:
                 item_data['latest_version'] = k
                 item_data['latest_app_version'] = chart_metadata.get('appVersion')

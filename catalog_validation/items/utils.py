@@ -154,8 +154,19 @@ def get_catalog_json_schema() -> dict:
                             },
                             'icon_url': {
                                 'type': ['string', 'null'],
-                            }
-
+                            },
+                            'maintainers': {
+                                'type': 'array',
+                                'items': {
+                                    'type': 'object',
+                                    'properties': {
+                                        'name': {'type': 'string'},
+                                        'url': {'type': ['string', 'null']},
+                                        'email': {'type': 'string'}
+                                    },
+                                    'required': ['name', 'email'],
+                                }
+                            },
                         },
                         'required': [
                             'name', 'categories', 'location', 'healthy', 'icon_url',

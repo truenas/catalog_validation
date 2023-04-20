@@ -26,6 +26,7 @@ QUESTION_CONTEXT = {
          'healthy_error': None,
          'last_update': None,
          'versions': {},
+         'maintainers': [],
          'latest_version': None,
          'latest_app_version': None,
          'latest_human_version': None,
