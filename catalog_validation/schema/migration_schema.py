@@ -3,7 +3,7 @@ import re
 
 APP_MIGRATION_SCHEMA = {
     'type': 'array',
-    'items': [{
+    'items': {
         'type': 'object',
         'properties': {
             'app_name': {'type': 'string'},
@@ -34,7 +34,7 @@ APP_MIGRATION_SCHEMA = {
                 },
             },
         ],
-    }],
+    },
 }
 MIGRATION_DIRS = ['.migrations', 'ix-migrations']
 RE_MIGRATION_NAME_STR = r'^\d+\w+.json'

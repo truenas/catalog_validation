@@ -101,7 +101,7 @@ class Schema:
                 },
             },
             'required': ['type'],
-            'dependencies': {
+            'dependentRequired': {
                 'show_subquestions_if': ['subquestions']
             }
         }
