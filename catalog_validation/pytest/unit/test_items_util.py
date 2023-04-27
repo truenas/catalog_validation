@@ -87,7 +87,7 @@ def test_get_item_details_impl(
     open_file_data = mocker.mock_open(read_data=open_yaml)
     mocker.patch('builtins.open', open_file_data)
     mocker.patch('os.path.isdir', return_value=True)
-    mocker.patch('os.listdir', return_value=['upgrade_info.json', '1.3.37', 'upgrade_strategy', 'item.yaml'])
+    mocker.patch('os.listdir', return_value=['1.3.37'])
     mocker.patch('catalog_validation.items.items_util.validate_item_version', return_value=None)
     mocker.patch('catalog_validation.items.items_util.get_item_version_details', return_value={})
     assert get_item_details_impl(item_path, schema, QUESTION_CONTEXT, options) == item_data_impl
