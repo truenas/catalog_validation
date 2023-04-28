@@ -155,6 +155,7 @@ def get_item_version_details(
     version_data = {'location': version_path, 'required_features': set()}
     for key, filename, parser in (
         ('chart_metadata', 'Chart.yaml', yaml.safe_load),
+        ('app_metadata', 'metadata.yaml', yaml.safe_load),
         ('schema', 'questions.yaml', yaml.safe_load),
         ('app_readme', 'app-readme.md', markdown.markdown),
         ('detailed_readme', 'README.md', markdown.markdown),
