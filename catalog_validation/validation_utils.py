@@ -23,6 +23,18 @@ def validate_chart_version(
                     if chart_config.get('name') != item_name:
                         verrors.add(f'{schema}.item_name', 'Item name not correctly set in "Chart.yaml".')
 
+                    if not isinstance(chart_config.get('maintainers', []), list):
+                        verrors.add(f'{schema}.maintainers', 'Maintainers must be a list')
+                    else:
+                        for index, maintainer in enumerate(chart_config.get('maintainers', [])):
+                            if not isinstance(maintainer, dict):
+                                verrors.add(f'{schema}.maintainers.{index}', 'Maintainer must be a dictionary')
+                            elif not all(k in maintainer and isinstance(maintainer[k], str) for k in ('name', 'email')):
+                                verrors.add(
+                                    f'{schema}.maintainers.{index}',
+                                    'Maintainer must have name and email attributes defined and be strings.'
+                                )
+
                     chart_version = chart_config.get('version')
                     if chart_version is None:
                         verrors.add(f'{schema}.version', 'Version must be configured in "Chart.yaml"')
