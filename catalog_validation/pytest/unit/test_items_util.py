@@ -33,6 +33,7 @@ QUESTION_CONTEXT = {
          'recommended': False,
          'title': 'Chia',
          'description': None,
+         'tags': [],
      }
      ),
 ])
@@ -72,9 +73,12 @@ def test_get_item_details(mocker, item_location, options, items_data):
                 }
             },
             'categories': ['storage', 'crypto'],
-            'icon_url': 'https://www.chia.net/wp-content/uploads/2022/09/chia-logo.svg'
+            'icon_url': 'https://www.chia.net/wp-content/uploads/2022/09/chia-logo.svg',
+            'tags': ['finance'],
         },
         '''
+        tags:
+          - finance
         categories:
           - storage
           - crypto
