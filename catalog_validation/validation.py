@@ -23,31 +23,33 @@ from .utils import (
 )
 
 
-def validate_catalog(catalog_path):
+def validate_catalog(catalog_path, ignore_catalog_json=False):
     if not os.path.exists(catalog_path):
         raise CatalogDoesNotExist(catalog_path)
 
     verrors = ValidationErrors()
     items = []
     item_futures = []
-    cached_catalog_file_path = os.path.join(catalog_path, CACHED_CATALOG_FILE_NAME)
-    if not os.path.exists(cached_catalog_file_path):
-        verrors.add(
-            'cached_catalog_file',
-            f'{CACHED_CATALOG_FILE_NAME!r} metadata file must be specified for a valid catalog'
-        )
-    else:
-        try:
-            with open(cached_catalog_file_path, 'r') as f:
-                json_schema_validate(json.loads(f.read()), get_catalog_json_schema())
 
-        except (json.JSONDecodeError, JsonValidationError) as e:
+    if not ignore_catalog_json:
+        cached_catalog_file_path = os.path.join(catalog_path, CACHED_CATALOG_FILE_NAME)
+        if not os.path.exists(cached_catalog_file_path):
             verrors.add(
                 'cached_catalog_file',
-                f'Failed to validate contents of {cached_catalog_file_path!r}: {e!r}'
+                f'{CACHED_CATALOG_FILE_NAME!r} metadata file must be specified for a valid catalog'
             )
+        else:
+            try:
+                with open(cached_catalog_file_path, 'r') as f:
+                    json_schema_validate(json.loads(f.read()), get_catalog_json_schema())
 
-    verrors.check()
+            except (json.JSONDecodeError, JsonValidationError) as e:
+                verrors.add(
+                    'cached_catalog_file',
+                    f'Failed to validate contents of {cached_catalog_file_path!r}: {e!r}'
+                )
+
+        verrors.check()
 
     validate_recommended_apps_file(catalog_path)
 

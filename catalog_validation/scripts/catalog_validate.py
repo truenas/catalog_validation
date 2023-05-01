@@ -5,10 +5,10 @@ from catalog_validation.exceptions import CatalogDoesNotExist, ValidationErrors
 from catalog_validation.validation import validate_catalog
 
 
-def validate(catalog_path):
+def validate(catalog_path, ignore_catalog_json=False):
 
     try:
-        validate_catalog(catalog_path)
+        validate_catalog(catalog_path, ignore_catalog_json)
     except CatalogDoesNotExist:
         print(f'[\033[91mFAILED\x1B[0m]\tSpecified {catalog_path!r} path does not exist')
         exit(1)
@@ -27,10 +27,11 @@ def main():
 
     parser_setup = subparsers.add_parser('validate', help='Validate TrueNAS catalog')
     parser_setup.add_argument('--path', help='Specify path of TrueNAS catalog')
+    parser_setup.add_argument('--ignore-catalog-json', help='Will not validate the catalog.json file', action=argparse.BooleanOptionalAction)
 
     args = parser.parse_args()
     if args.action == 'validate':
-        validate(args.path)
+        validate(args.path, args.ignore_catalog_json)
     else:
         parser.print_help()
 
