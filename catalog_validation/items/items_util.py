@@ -33,6 +33,7 @@ def get_item_details_base() -> dict:
         'title': None,
         'versions': {},
         'maintainers': [],
+        'tags': [],
     }
 
 
