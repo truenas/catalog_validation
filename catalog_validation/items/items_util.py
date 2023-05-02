@@ -33,6 +33,7 @@ def get_item_details_base() -> dict:
         'title': None,
         'versions': {},
         'maintainers': [],
+        'tags': [],
     }
 
 
@@ -110,7 +111,12 @@ def get_item_details_impl(
     # Each directory under item path represents a version of the item and we need to retrieve details
     # for each version available under the item
     retrieve_latest_version = options.get('retrieve_latest_version')
-    item_data = {'versions': {}}
+    item_data = {
+        'categories': [],
+        'icon_url': None,
+        'tags': [],
+        'versions': {},
+    }
     with open(os.path.join(item_path, 'item.yaml'), 'r') as f:
         item_data.update(yaml.safe_load(f.read()))
 
