@@ -167,11 +167,20 @@ def get_catalog_json_schema() -> dict:
                                     'required': ['name', 'email'],
                                 }
                             },
+                            'home': {
+                                'type': 'string',
+                            },
+                            'tags': {
+                                'type': 'array',
+                                'items': {
+                                    'type': 'string',
+                                }
+                            },
                         },
                         'required': [
                             'name', 'categories', 'location', 'healthy', 'icon_url',
                             'latest_version', 'latest_app_version', 'latest_human_version',
-                            'last_update', 'recommended', 'healthy_error',
+                            'last_update', 'recommended', 'healthy_error', 'maintainers', 'home', 'tags',
                         ],
                     }
                 }

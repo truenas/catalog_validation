@@ -24,6 +24,7 @@ QUESTION_CONTEXT = {
          'location': '/mnt/mypool/ix-applications/catalogs/github_com_truenas_charts_git_master/charts/chia',
          'healthy': True,
          'healthy_error': None,
+         'home': None,
          'last_update': None,
          'versions': {},
          'maintainers': [],
