@@ -23,6 +23,7 @@ def get_item_details_base() -> dict:
         'description': None,
         'healthy': False,  # healthy means that each version the item hosts is valid and healthy
         'healthy_error': None,  # An error string explaining why the item is not healthy
+        'home': None,
         'location': None,
         'latest_version': None,
         'latest_app_version': None,
@@ -94,6 +95,8 @@ def get_item_details(
                 'annotations', {}
             ).get('title'):
                 item_data['title'] = chart_metadata['annotations']['title']
+            if item_data['home'] is None and chart_metadata.get('home'):
+                item_data['home'] = chart_metadata['home']
 
     if unhealthy_versions:
         item_data['healthy_error'] = f'Errors were found with {", ".join(unhealthy_versions)} version(s)'
