@@ -23,6 +23,13 @@ def validate_chart_version(
                     if chart_config.get('name') != item_name:
                         verrors.add(f'{schema}.item_name', 'Item name not correctly set in "Chart.yaml".')
 
+                    if not isinstance(chart_config.get('sources', []), list):
+                        verrors.add(f'{schema}.sources', 'Sources must be a list')
+                    else:
+                        for index, source in enumerate(chart_config.get('sources', [])):
+                            if not isinstance(source, str):
+                                verrors.add(f'{schema}.sources.{index}', 'Source must be a string')
+
                     if not isinstance(chart_config.get('maintainers', []), list):
                         verrors.add(f'{schema}.maintainers', 'Maintainers must be a list')
                     else:

@@ -35,6 +35,7 @@ def get_item_details_base() -> dict:
         'versions': {},
         'maintainers': [],
         'tags': [],
+        'sources': [],
     }
 
 
@@ -97,6 +98,8 @@ def get_item_details(
                 item_data['title'] = chart_metadata['annotations']['title']
             if item_data['home'] is None and chart_metadata.get('home'):
                 item_data['home'] = chart_metadata['home']
+            if not item_data['sources'] and chart_metadata.get('sources'):
+                item_data['sources'] = chart_metadata['sources']
 
     if unhealthy_versions:
         item_data['healthy_error'] = f'Errors were found with {", ".join(unhealthy_versions)} version(s)'
