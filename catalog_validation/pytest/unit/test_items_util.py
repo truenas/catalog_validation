@@ -35,6 +35,7 @@ QUESTION_CONTEXT = {
          'title': 'Chia',
          'description': None,
          'tags': [],
+         'screenshots': [],
          'sources': [],
      }
      ),
