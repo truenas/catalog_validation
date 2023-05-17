@@ -78,9 +78,12 @@ def test_get_item_details(mocker, item_location, options, items_data):
             'categories': ['storage', 'crypto'],
             'icon_url': 'https://www.chia.net/wp-content/uploads/2022/09/chia-logo.svg',
             'tags': ['finance'],
+            'screenshots': ['https://www.chia.net/wp-content/uploads/2022/09/chia-logo.svg'],
             'sources': ['https://hub.docker.com/r/emby/embyserver'],
         },
         '''
+        screenshots:
+          - 'https://www.chia.net/wp-content/uploads/2022/09/chia-logo.svg'
         tags:
           - finance
         categories:

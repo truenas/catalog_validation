@@ -184,7 +184,9 @@ def validate_catalog_item(catalog_item_path, schema, validate_versions=True):
             item_config = yaml.safe_load(f.read())
 
         validate_key_value_types(
-            item_config, (('categories', list), ('tags', list, False)), verrors, f'{schema}.item_config'
+            item_config, (
+                ('categories', list), ('tags', list, False), ('screenshots', list, False),
+            ), verrors, f'{schema}.item_config'
         )
 
     for version_path in (versions if validate_versions else []):
