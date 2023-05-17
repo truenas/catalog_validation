@@ -135,7 +135,8 @@ def get_catalog_json_schema() -> dict:
                                 'type': ['string', 'null'],
                             },
                             'last_update': {
-                                'type': ['string', 'null'],
+                                'type': 'string',
+                                'pattern': r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$',
                             },
                             'latest_version': {
                                 'type': 'string',
