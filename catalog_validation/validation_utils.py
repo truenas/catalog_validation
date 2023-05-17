@@ -25,16 +25,6 @@ def validate_chart_version(
 
                     if not isinstance(chart_config.get('annotations', {}), dict):
                         verrors.add(f'{schema}.annotations', 'Annotations must be a dictionary')
-                    else:
-                        annotations = chart_config.get('annotations', {})
-                        if not isinstance(annotations.get('screenshots', []), list):
-                            verrors.add(f'{schema}.annotations.screenshots', 'Screenshots must be a list')
-                        else:
-                            for index, screenshot in enumerate(annotations.get('screenshots', [])):
-                                if not isinstance(screenshot, str):
-                                    verrors.add(
-                                        f'{schema}.annotations.screenshots.{index}', 'Screenshot must be a string'
-                                    )
 
                     if not isinstance(chart_config.get('sources', []), list):
                         verrors.add(f'{schema}.sources', 'Sources must be a list')
