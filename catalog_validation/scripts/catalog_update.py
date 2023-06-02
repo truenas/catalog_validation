@@ -5,11 +5,15 @@ import json
 import os
 import shutil
 
+from jsonschema import validate as json_schema_validate, ValidationError as JsonValidationError
+
 from catalog_validation.ci.utils import (
     get_app_version, get_ci_development_directory, OPTIONAL_METADATA_FILES,
     REQUIRED_METADATA_FILES, version_has_been_bumped,
 )
+from catalog_validation.exceptions import ValidationErrors
 from catalog_validation.items.catalog import get_items_in_trains, retrieve_train_names, retrieve_trains_data
+from catalog_validation.items.utils import get_catalog_json_schema
 from catalog_validation.utils import CACHED_CATALOG_FILE_NAME
 from collections import defaultdict
 
@@ -21,6 +25,18 @@ def get_trains(location: str) -> dict:
     items = get_items_in_trains(trains_to_traverse, location)
 
     return retrieve_trains_data(items, location, preferred_trains, trains_to_traverse)[0]
+
+
+def validate_train_data(train_data):
+    verrors = ValidationErrors()
+    try:
+        json_schema_validate(train_data, get_catalog_json_schema())
+    except (json.JSONDecodeError, JsonValidationError) as e:
+        verrors.add(
+            'catalog_json',
+            f'Failed to validate contents of train data: {e!r}'
+        )
+    verrors.check()
 
 
 def get_apps_to_publish(catalog_path: str) -> dict:
@@ -90,8 +106,10 @@ def publish_updated_apps(catalog_path: str) -> None:
 
 def update_catalog_file(location: str) -> None:
     catalog_file_path = os.path.join(location, CACHED_CATALOG_FILE_NAME)
+    train_data = get_trains(location)
+    validate_train_data(train_data)
     with open(catalog_file_path, 'w') as f:
-        f.write(json.dumps(get_trains(location), indent=4))
+        f.write(json.dumps(train_data, indent=4))
 
     print(f'[\033[92mOK\x1B[0m]\tUpdated {catalog_file_path!r} successfully!')
 
