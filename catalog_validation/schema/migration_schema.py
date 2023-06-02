@@ -1,6 +1,7 @@
 import re
 
 
+APP_MIGRATION_DIR = 'migrations'
 APP_MIGRATION_SCHEMA = {
     'type': 'array',
     'items': {
