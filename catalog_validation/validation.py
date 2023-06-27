@@ -14,7 +14,9 @@ from .items.questions_utils import (
     CUSTOM_PORTALS_KEY, CUSTOM_PORTALS_ENABLE_KEY, CUSTOM_PORTAL_GROUP_KEY,
 )
 from .items.utils import get_catalog_json_schema, RECOMMENDED_APPS_FILENAME, RECOMMENDED_APPS_SCHEMA, TRAIN_IGNORE_DIRS
-from .schema.migration_schema import APP_MIGRATION_SCHEMA, MIGRATION_DIRS, RE_MIGRATION_NAME, RE_MIGRATION_NAME_STR
+from .schema.migration_schema import (
+    APP_MIGRATION_SCHEMA, MIGRATION_DIRS, RE_MIGRATION_NAME, RE_MIGRATION_NAME_STR, APP_MIGRATION_DIR,
+)
 from .schema.variable import Variable
 from .validation_utils import validate_chart_version
 from .utils import (
@@ -198,6 +200,20 @@ def validate_catalog_item(catalog_item_path, schema, validate_versions=True):
     verrors.check()
 
 
+def validate_app_migrations(version_path, schema):
+    verrors = ValidationErrors()
+    app_migration_path = os.path.join(version_path, APP_MIGRATION_DIR)
+
+    if not os.path.exists(app_migration_path):
+        return verrors
+
+    for migration_file in os.listdir(app_migration_path):
+        migration_file_path = os.path.join(app_migration_path, migration_file)
+        if not os.access(migration_file_path, os.X_OK):
+            verrors.add(schema, f'{migration_file!r} is not executable')
+    return verrors
+
+
 def validate_catalog_item_version(
     version_path: str, schema: str, version_name: Optional[str] = None, item_name: Optional[str] = None,
     validate_values: bool = False,
@@ -240,6 +256,8 @@ def validate_catalog_item_version(
             validate_metadata_yaml(metadata_path, f'{schema}.metadata_configuration')
         except ValidationErrors as v:
             verrors.extend(v)
+
+    validate_app_migrations(version_path, f'{schema}.app_migrations')
 
     verrors.check()
 
