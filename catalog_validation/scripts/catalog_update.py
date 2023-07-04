@@ -114,21 +114,21 @@ def update_catalog_file(location: str) -> None:
     print(f'[\033[92mOK\x1B[0m]\tUpdated {catalog_file_path!r} successfully!')
 
 
-def update_catalog(catalog_path: str) -> None:
-    publish_updated_apps(catalog_path)
-    update_catalog_file(catalog_path)
-
-
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(help='sub-command help', dest='action')
+
+    publish_setup = subparsers.add_parser('publish', help='Publish apps of TrueNAS catalog')
+    publish_setup.add_argument('--path', help='Specify path of TrueNAS catalog')
 
     parser_setup = subparsers.add_parser('update', help='Update TrueNAS catalog')
     parser_setup.add_argument('--path', help='Specify path of TrueNAS catalog')
 
     args = parser.parse_args()
-    if args.action == 'update':
-        update_catalog(args.path)
+    if args.action == 'publish':
+        publish_updated_apps(args.path)
+    elif args.action == 'update':
+        update_catalog_file(args.path)
     else:
         parser.print_help()
 
