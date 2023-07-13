@@ -210,4 +210,5 @@ def get_default_questions_context() -> dict:
         'certificates': [],
         'certificate_authorities': [],
         'system.general.config': {'timezone': 'America/Los_Angeles'},
+        'unused_ports': [i for i in range(1025, 65535)],
     }
