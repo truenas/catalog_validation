@@ -186,6 +186,14 @@ class HostPathSchema(Schema):
     DEFAULT_TYPE = 'string'
 
 
+class HostPathDirSchema(Schema):
+    DEFAULT_TYPE = 'string'
+
+
+class HostPathFileSchema(Schema):
+    DEFAULT_TYPE = 'string'
+
+
 class URISchema(Schema):
     DEFAULT_TYPE = 'string'
 
