@@ -1,6 +1,6 @@
 from .attrs import (
-    BooleanSchema, StringSchema, IntegerSchema, PathSchema, HostPathSchema, ListSchema, DictSchema,
-    IPAddrSchema, CronSchema, URISchema
+    BooleanSchema, StringSchema, IntegerSchema, PathSchema, HostPathSchema, HostPathDirSchema,
+    HostPathFileSchema, ListSchema, DictSchema, IPAddrSchema, CronSchema, URISchema
 )
 
 
@@ -20,6 +20,10 @@ def get_schema(schema_data):
         schema = PathSchema
     elif s_type == 'hostpath':
         schema = HostPathSchema
+    elif s_type == 'hostpathdirectory':
+        schema = HostPathDirSchema
+    elif s_type == 'hostpathfile':
+        schema = HostPathFileSchema
     elif s_type == 'list':
         schema = ListSchema
     elif s_type == 'dict':
