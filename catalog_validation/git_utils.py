@@ -28,6 +28,10 @@ def get_changed_apps(catalog_path: str, base_branch: str = 'master') -> dict:
             continue
 
         app_name = dev_dir_relative_path.split('/')[1]
+        base_name = os.path.basename(file_path)
+
+        if base_name in ['upgrade_strategy', 'upgrade_info']:
+            continue
         if not os.path.isdir(os.path.join(dev_directory_path, train_name, app_name)):
             continue
 
