@@ -9,7 +9,7 @@ from jsonschema import validate as json_schema_validate, ValidationError as Json
 
 from catalog_validation.ci.utils import (
     get_app_version, get_ci_development_directory, OPTIONAL_METADATA_FILES,
-    REQUIRED_METADATA_FILES, version_has_been_bumped,
+    REQUIRED_METADATA_FILES, version_has_been_bumped, get_to_keep_versions
 )
 from catalog_validation.exceptions import ValidationErrors
 from catalog_validation.items.catalog import get_items_in_trains, retrieve_train_names, retrieve_trains_data
@@ -74,6 +74,7 @@ def publish_updated_apps(catalog_path: str) -> None:
             dev_app_path = os.path.join(dev_train_path, app_name)
             publish_app_path = os.path.join(publish_train_path, app_name)
             publish_app_version_path = os.path.join(publish_app_path, app_version)
+            required_versions = get_to_keep_versions(dev_app_path)
             os.makedirs(publish_app_path, exist_ok=True)
 
             dev_item_yaml_path = os.path.join(dev_app_path, 'item.yaml')
@@ -92,7 +93,7 @@ def publish_updated_apps(catalog_path: str) -> None:
 
             for version in os.listdir(publish_app_path):
                 version_path = os.path.join(publish_app_path, version)
-                if not os.path.isdir(version_path):
+                if not os.path.isdir(version_path) or version in required_versions:
                     continue
 
                 if version != app_version:

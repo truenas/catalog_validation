@@ -1,9 +1,14 @@
 import os
+import yaml
 
 from catalog_validation.exceptions import ValidationErrors
 from catalog_validation.validation import validate_catalog_item_version, validate_chart_version
+from jsonschema import ValidationError as JsonValidationError
 
-from .utils import get_app_version, get_ci_development_directory, REQUIRED_METADATA_FILES, version_has_been_bumped
+from .utils import (
+    get_app_version, get_ci_development_directory, REQUIRED_METADATA_FILES, version_has_been_bumped,
+    TO_KEEP_VERSIONS, REQUIRED_VERSIONS_SCHEMA, get_to_keep_versions,
+)
 
 
 def validate_dev_directory_structure(catalog_path: str, to_check_apps: dict) -> None:
@@ -51,10 +56,25 @@ def validate_train(catalog_path: str, train_path: str, schema: str, to_check_app
         verrors.check()
 
 
+def validate_keep_versions(app_dir_path: str, schema: str, verrors: ValidationErrors) -> ValidationErrors:
+    try:
+        get_to_keep_versions(app_dir_path)
+    except yaml.YAMLError:
+        verrors.add(f'{schema}.{REQUIRED_VERSIONS_SCHEMA}', 'Invalid yaml format')
+    except JsonValidationError:
+        verrors.add(
+            f'{schema}.{REQUIRED_VERSIONS_SCHEMA}',
+            f'Invalid json schema {TO_KEEP_VERSIONS} must contain list of required versions'
+        )
+
+    return verrors
+
+
 def validate_app(app_dir_path: str, schema: str) -> None:
     app_name = os.path.basename(app_dir_path)
     chart_version_path = os.path.join(app_dir_path, 'Chart.yaml')
     verrors = validate_chart_version(ValidationErrors(), chart_version_path, schema, app_name)
+    validate_keep_versions(app_dir_path, app_name, verrors)
     verrors.check()
 
     validate_catalog_item_version(app_dir_path, schema, get_app_version(app_dir_path), app_name, True)
