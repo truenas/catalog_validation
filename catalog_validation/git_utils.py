@@ -5,6 +5,7 @@ from catalog_validation.ci.utils import DEV_DIRECTORY_RELATIVE_PATH, get_ci_deve
 from catalog_validation.items.utils import valid_train
 from collections import defaultdict
 
+from .ci.utils import OPTIONAL_METADATA_FILES
 from .exceptions import CatalogDoesNotExist
 
 
@@ -30,7 +31,7 @@ def get_changed_apps(catalog_path: str, base_branch: str = 'master') -> dict:
         app_name = dev_dir_relative_path.split('/')[1]
         base_name = os.path.basename(file_path)
 
-        if base_name in ['upgrade_strategy', 'upgrade_info']:
+        if base_name in OPTIONAL_METADATA_FILES:
             continue
         if not os.path.isdir(os.path.join(dev_directory_path, train_name, app_name)):
             continue
