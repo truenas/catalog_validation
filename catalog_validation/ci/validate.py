@@ -7,7 +7,7 @@ from jsonschema import ValidationError as JsonValidationError
 
 from .utils import (
     get_app_version, get_ci_development_directory, REQUIRED_METADATA_FILES, version_has_been_bumped,
-    TO_KEEP_VERSIONS, REQUIRED_VERSIONS_SCHEMA, get_to_keep_versions,
+    TO_KEEP_VERSIONS, REQUIRED_VERSIONS_SCHEMA, get_to_keep_versions, UPDATE_STRATEGY_FILE
 )
 
 
@@ -67,7 +67,11 @@ def validate_keep_versions(app_dir_path: str, schema: str, verrors: ValidationEr
             f'Invalid json schema {TO_KEEP_VERSIONS} must contain list of required versions'
         )
 
-    return verrors
+
+def validate_upgrate_strategy(app_path, schema, verrors):
+    upgrade_strategy_path = os.path.join(app_path, UPDATE_STRATEGY_FILE)
+    if os.path.exists(upgrade_strategy_path) and not os.access(upgrade_strategy_path, os.X_OK):
+        verrors.add(schema, f'{upgrade_strategy_path!r} is not executable')
 
 
 def validate_app(app_dir_path: str, schema: str) -> None:
@@ -88,5 +92,5 @@ def validate_app(app_dir_path: str, schema: str) -> None:
             f'{schema}.required_files',
             f'{", ".join(missing_files)!r} file(s) must be specified'
         )
-
+    validate_upgrate_strategy(app_dir_path, f'{schema}.{UPDATE_STRATEGY_FILE}', verrors)
     verrors.check()

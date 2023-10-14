@@ -10,6 +10,7 @@ DEV_DIRECTORY_RELATIVE_PATH: str = os.path.join('library', DEVELOPMENT_DIR)
 TO_KEEP_VERSIONS = 'to_keep_versions.yaml'
 OPTIONAL_METADATA_FILES = ['upgrade_info.json', 'upgrade_strategy', TO_KEEP_VERSIONS]
 REQUIRED_METADATA_FILES = ['item.yaml']
+UPDATE_STRATEGY_FILE = 'upgrade_strategy'
 
 
 REQUIRED_VERSIONS_SCHEMA = {
