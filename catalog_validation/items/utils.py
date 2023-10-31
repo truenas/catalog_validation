@@ -26,10 +26,10 @@ TRAIN_IGNORE_DIRS = ['library', 'docs', DEVELOPMENT_DIR] + MIGRATION_DIRS
 ACL_QUESTION = [
     {
         'variable': 'path',
-        'label': 'Path',
-        'description': 'Path to perform ACL',
+        'label': 'Host Path',
+        'description': 'Host Path to perform ACL',
         'schema': {
-            'type': 'string',
+            'type': 'hostpath',
             'required': True,
             'empty': False,
         }
