@@ -20,8 +20,8 @@ from .schema.migration_schema import (
 from .schema.variable import Variable
 from .validation_utils import validate_chart_version
 from .utils import (
-    CACHED_CATALOG_FILE_NAME, METADATA_JSON_SCHEMA, validate_key_value_types,
-    VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
+    CACHED_CATALOG_FILE_NAME, CACHED_VERSION_FILE_NAME, METADATA_JSON_SCHEMA, validate_key_value_types,
+    VALID_TRAIN_REGEX, VERSION_VALIDATION_SCHEMA, WANTED_FILES_IN_ITEM_VERSION
 )
 
 
@@ -211,6 +211,14 @@ def validate_app_migrations(version_path, schema):
         migration_file_path = os.path.join(app_migration_path, migration_file)
         if not os.access(migration_file_path, os.X_OK):
             verrors.add(schema, f'{migration_file!r} is not executable')
+    return verrors
+
+
+def validate_catalog_item_version_data(version_data: dict, schema: str, verrors: ValidationErrors) -> ValidationErrors:
+    try:
+        json_schema_validate(version_data, VERSION_VALIDATION_SCHEMA)
+    except JsonValidationError as e:
+        verrors.add(schema, f'Invalid format specified for application versions: {e}')
     return verrors
 
 
