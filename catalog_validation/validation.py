@@ -191,6 +191,14 @@ def validate_catalog_item(catalog_item_path, schema, validate_versions=True):
             ), verrors, f'{schema}.item_config'
         )
 
+    try:
+        with open(os.path.join(catalog_item_path, CACHED_VERSION_FILE_NAME), 'r') as f:
+            validate_catalog_item_version_data(json.loads(f.read()), f'{schema}.{CACHED_VERSION_FILE_NAME}', verrors)
+    except FileNotFoundError:
+        verrors.add(f'{schema}.{CACHED_VERSION_FILE_NAME}', f'{CACHED_VERSION_FILE_NAME!r} not found')
+    except json.JSONDecodeError:
+        verrors.add(f'{schema}.{CACHED_VERSION_FILE_NAME}', f'{CACHED_VERSION_FILE_NAME!r} is not a valid json file')
+
     for version_path in (versions if validate_versions else []):
         try:
             validate_catalog_item_version(version_path, f'{schema}.versions.{os.path.basename(version_path)}')
