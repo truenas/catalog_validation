@@ -2,6 +2,7 @@ import re
 
 
 CACHED_CATALOG_FILE_NAME = 'catalog.json'
+CACHED_VERSION_FILE_NAME = 'app_versions.json'
 METADATA_JSON_SCHEMA = {
     'type': 'object',
     'properties': {
@@ -44,6 +45,168 @@ METADATA_JSON_SCHEMA = {
     },
 }
 VALID_TRAIN_REGEX = re.compile(r'^\w+[\w.-]*$')
+VERSION_VALIDATION_SCHEMA = {
+    'type': 'object',
+    'title': 'Versions',
+    'patternProperties': {
+        '[0-9]+.[0-9]+.[0-9]+': {
+            'type': 'object',
+            'properties': {
+                'healthy': {
+                    'type': 'boolean',
+                },
+                'supported': {
+                    'type': 'boolean',
+                },
+                'healthy_error': {
+                    'type': ['string', 'null']
+                },
+                'location': {
+                    'type': 'string',
+                    'pattern': r'^(\/[a-zA-Z0-9_.-]+)+$'
+                },
+                'last_update': {
+                    'type': 'string',
+                    'pattern': '^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$'
+                },
+                'required_features': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'string'
+                    }
+                },
+                'human_version': {
+                    'type': 'string'
+                },
+                'version': {
+                    'type': 'string',
+                    'pattern': '[0-9]+.[0-9]+.[0-9]+'
+                },
+                'chart_metadata': {
+                    'type': 'object',
+                    'properties': {
+                        'name': {
+                            'type': 'string'
+                        },
+                        'description': {
+                            'type': 'string'
+                        },
+                        'annotations': {
+                            'type': 'object'
+                        },
+                        'type': {
+                            'type': 'string'
+                        },
+                        'version': {
+                            'type': 'string',
+                            'pattern': '[0-9]+.[0-9]+.[0-9]+'
+                        },
+                        'apiVersion': {
+                            'type': 'string',
+                        },
+                        'appVersion': {
+                            'type': 'string'
+                        },
+                        'kubeVersion': {
+                            'type': 'string'
+                        },
+                        'app_readme': {'type': 'string'},
+                        'detailed_readme': {'type': 'string'},
+                        'changelog': {'type': ['string', 'null']},
+                        'maintainers': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'object',
+                                'properties': {
+                                    'name': {'type': 'string'},
+                                    'url': {'type': ['string', 'null']},
+                                    'email': {'type': 'string'},
+                                },
+                                'required': ['name', 'email'],
+                            }
+                        },
+                        'dependencies': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'object',
+                                'properties': {
+                                    'name': {'type': 'string'},
+                                    'repository': {'type': 'string'},
+                                    'version': {'type': 'string'}
+                                }
+                            }
+                        },
+                        'home': {'type': 'string'},
+                        'icon': {'type': 'string'},
+                        'sources': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'string'
+                            }
+                        },
+                        'keywords': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'string'
+                            }
+                        },
+                    }
+                },
+                'app_metadata': {
+                    **METADATA_JSON_SCHEMA,
+                    'type': ['object', 'null'],
+                },
+                'schema': {
+                    'type': 'object',
+                    'properties': {
+                        'groups': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'object',
+                                'properties': {
+                                    'name': {
+                                        'type': 'string'
+                                    },
+                                    'description': {
+                                        'type': 'string'
+                                    },
+                                },
+                                'required': ['description', 'name'],
+                            }
+                        },
+                        'portals': {
+                            'type': 'object'
+                        },
+                        'questions': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'object',
+                                'properties': {
+                                    'variable': {'type': 'string'},
+                                    'label': {'type': 'string'},
+                                    'group': {'type': 'string'},
+                                    'schema': {
+                                        'type': 'object',
+                                        'properties': {
+                                            'type': {'type': 'string'}
+                                        },
+                                        'required': ['type']
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    'required': ['groups', 'questions']
+                },
+            },
+            'required': [
+                'healthy', 'supported', 'healthy_error', 'location', 'last_update', 'required_features',
+                'human_version', 'version', 'chart_metadata', 'app_metadata', 'schema',
+            ],
+        },
+    },
+    'additionalProperties': False
+}
 WANTED_FILES_IN_ITEM_VERSION = {'questions.yaml', 'app-readme.md', 'Chart.yaml', 'README.md'}
 
 
