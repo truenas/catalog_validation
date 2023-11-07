@@ -15,7 +15,7 @@ from catalog_validation.ci.utils import (
 from catalog_validation.exceptions import ValidationErrors
 from catalog_validation.items.catalog import get_items_in_trains, retrieve_train_names, retrieve_trains_data
 from catalog_validation.items.utils import get_catalog_json_schema
-from catalog_validation.utils import CACHED_CATALOG_FILE_NAME
+from catalog_validation.utils import CACHED_CATALOG_FILE_NAME, CACHED_VERSION_FILE_NAME
 from catalog_validation.validation import validate_catalog_item_version_data
 from collections import defaultdict
 
@@ -138,6 +138,14 @@ def update_catalog_file(location: str) -> None:
         f.write(json.dumps(catalog_data, indent=4))
 
     print(f'[\033[92mOK\x1B[0m]\tUpdated {catalog_file_path!r} successfully!')
+
+    for train_name, train_data in versions_data.items():
+        for app_name, app_data in train_data.items():
+            version_path = os.path.join(location, train_name, app_name, CACHED_VERSION_FILE_NAME)
+            with open(version_path, 'w') as f:
+                f.write(json.dumps(app_data['versions'], indent=4))
+
+            print(f'[\033[92mOK\x1B[0m]\tUpdated {version_path!r} successfully!')
 
 
 def main():
