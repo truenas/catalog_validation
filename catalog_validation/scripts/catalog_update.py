@@ -121,10 +121,11 @@ def publish_updated_apps(catalog_path: str) -> None:
 
 def update_catalog_file(location: str) -> None:
     catalog_file_path = os.path.join(location, CACHED_CATALOG_FILE_NAME)
-    train_data = get_trains(location)
-    validate_train_data(train_data)
+    catalog_data, versions_data = get_trains(location)
+    validate_train_data(catalog_data)
+
     with open(catalog_file_path, 'w') as f:
-        f.write(json.dumps(train_data, indent=4))
+        f.write(json.dumps(catalog_data, indent=4))
 
     print(f'[\033[92mOK\x1B[0m]\tUpdated {catalog_file_path!r} successfully!')
 
