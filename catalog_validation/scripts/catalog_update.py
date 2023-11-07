@@ -16,6 +16,7 @@ from catalog_validation.exceptions import ValidationErrors
 from catalog_validation.items.catalog import get_items_in_trains, retrieve_train_names, retrieve_trains_data
 from catalog_validation.items.utils import get_catalog_json_schema
 from catalog_validation.utils import CACHED_CATALOG_FILE_NAME
+from catalog_validation.validation import validate_catalog_item_version_data
 from collections import defaultdict
 
 
@@ -50,6 +51,14 @@ def validate_train_data(train_data):
             'catalog_json',
             f'Failed to validate contents of train data: {e!r}'
         )
+    verrors.check()
+
+
+def validate_versions_data(versions_data):
+    verrors = ValidationErrors()
+    for train_name, train_data in versions_data.items():
+        for app_name, app_version_data in train_data.items():
+            validate_catalog_item_version_data(app_version_data['versions'], f'{train_name}.{app_name}', verrors)
     verrors.check()
 
 
@@ -122,6 +131,7 @@ def update_catalog_file(location: str) -> None:
     catalog_file_path = os.path.join(location, CACHED_CATALOG_FILE_NAME)
     catalog_data, versions_data = get_trains(location)
     validate_train_data(catalog_data)
+    validate_versions_data(versions_data)
 
     with open(catalog_file_path, 'w') as f:
         f.write(json.dumps(catalog_data, indent=4))
