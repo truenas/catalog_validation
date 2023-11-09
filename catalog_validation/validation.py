@@ -347,7 +347,7 @@ def validate_questions_yaml(questions_yaml_path, schema):
 
     groups = []
     for index, group in enumerate(questions_config['groups']):
-        if type(group) != dict:
+        if not isinstance(group, dict):
             verrors.add(f'{schema}.groups.{index}', 'Type of group should be a dictionary.')
             continue
 
@@ -413,7 +413,7 @@ def validate_variable_uniqueness(data, schema, verrors):
 
 
 def validate_question(question_data, schema, verrors, validate_top_level_attrs=None):
-    if type(question_data) != dict:
+    if not isinstance(question_data, dict):
         verrors.add(schema, 'Question must be a valid dictionary.')
         return
 
