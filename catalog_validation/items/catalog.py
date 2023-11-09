@@ -14,10 +14,7 @@ def item_details(items: dict, location: str, questions_context: typing.Optional[
     train = items[item_key]
     item = item_key.removesuffix(f'_{train}')
     item_location = os.path.join(location, train, item)
-    return {
-        k: v for k, v in get_item_details(item_location, questions_context, {'retrieve_versions': True}).items()
-        if k != 'versions'
-    }
+    return get_item_details(item_location, questions_context, {'retrieve_versions': True})
 
 
 def retrieve_train_names(location: str, all_trains=True, trains_filter=None) -> list:

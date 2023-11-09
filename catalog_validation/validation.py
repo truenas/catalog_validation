@@ -20,8 +20,8 @@ from .schema.migration_schema import (
 from .schema.variable import Variable
 from .validation_utils import validate_chart_version
 from .utils import (
-    CACHED_CATALOG_FILE_NAME, METADATA_JSON_SCHEMA, validate_key_value_types,
-    VALID_TRAIN_REGEX, WANTED_FILES_IN_ITEM_VERSION
+    CACHED_CATALOG_FILE_NAME, CACHED_VERSION_FILE_NAME, METADATA_JSON_SCHEMA, validate_key_value_types,
+    VALID_TRAIN_REGEX, VERSION_VALIDATION_SCHEMA, WANTED_FILES_IN_ITEM_VERSION
 )
 
 
@@ -191,6 +191,18 @@ def validate_catalog_item(catalog_item_path, schema, validate_versions=True):
             ), verrors, f'{schema}.item_config'
         )
 
+    cached_version_file_path = os.path.join(catalog_item_path, CACHED_VERSION_FILE_NAME)
+    if os.path.exists(cached_version_file_path):
+        try:
+            with open(cached_version_file_path, 'r') as f:
+                validate_catalog_item_version_data(
+                    json.loads(f.read()), f'{schema}.{CACHED_VERSION_FILE_NAME}', verrors
+                )
+        except json.JSONDecodeError:
+            verrors.add(
+                f'{schema}.{CACHED_VERSION_FILE_NAME}', f'{CACHED_VERSION_FILE_NAME!r} is not a valid json file'
+            )
+
     for version_path in (versions if validate_versions else []):
         try:
             validate_catalog_item_version(version_path, f'{schema}.versions.{os.path.basename(version_path)}')
@@ -211,6 +223,14 @@ def validate_app_migrations(version_path, schema):
         migration_file_path = os.path.join(app_migration_path, migration_file)
         if not os.access(migration_file_path, os.X_OK):
             verrors.add(schema, f'{migration_file!r} is not executable')
+    return verrors
+
+
+def validate_catalog_item_version_data(version_data: dict, schema: str, verrors: ValidationErrors) -> ValidationErrors:
+    try:
+        json_schema_validate(version_data, VERSION_VALIDATION_SCHEMA)
+    except JsonValidationError as e:
+        verrors.add(schema, f'Invalid format specified for application versions: {e}')
     return verrors
 
 
