@@ -44,6 +44,8 @@ METADATA_JSON_SCHEMA = {
         },
     },
 }
+RE_SCALE_VERSION = re.compile(r'^(\d+\.\d+)?(-(RC|BETA))?(\.\d+)?$')
+RE_VERSION_PATTERN = re.compile(r'(\d{2}\.\d{2})')
 VALID_TRAIN_REGEX = re.compile(r'^\w+[\w.-]*$')
 VERSION_VALIDATION_SCHEMA = {
     'type': 'object',
@@ -208,6 +210,11 @@ VERSION_VALIDATION_SCHEMA = {
     'additionalProperties': False
 }
 WANTED_FILES_IN_ITEM_VERSION = {'questions.yaml', 'app-readme.md', 'Chart.yaml', 'README.md'}
+
+
+def get_scale_version_float_val(version):
+    match = RE_VERSION_PATTERN.search(version)
+    return float(match.group(0))
 
 
 def validate_key_value_types(data_to_check, mapping, verrors, schema):
