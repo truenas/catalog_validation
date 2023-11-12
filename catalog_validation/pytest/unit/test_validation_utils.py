@@ -98,6 +98,7 @@ def test_validate_min_max_version_values(annotations_dict, schema, expected_erro
     if expected_error:
         with pytest.raises(ValidationErrors) as ve:
             validate_min_max_version_values(annotations_dict, verrors, schema)
+            verrors.check()
         assert ve.value.errors[0].errmsg == expected_error
     else:
         assert validate_min_max_version_values(annotations_dict, verrors, schema) is None
