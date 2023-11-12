@@ -212,10 +212,6 @@ VERSION_VALIDATION_SCHEMA = {
 WANTED_FILES_IN_ITEM_VERSION = {'questions.yaml', 'app-readme.md', 'Chart.yaml', 'README.md'}
 
 
-def get_scale_version_float_val(version):
-    return float(RE_VERSION_PATTERN.search(version).group(0))
-
-
 def validate_key_value_types(data_to_check, mapping, verrors, schema):
     for key_mapping in mapping:
         if len(key_mapping) == 2:
