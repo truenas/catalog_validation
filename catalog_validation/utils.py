@@ -45,7 +45,7 @@ METADATA_JSON_SCHEMA = {
     },
 }
 RE_SCALE_VERSION = re.compile(r'^(\d+\.\d+)?(-(RC|BETA))?(\.\d+)?$')
-RE_VERSION_PATTERN = re.compile(r'(\d{2}\.\d{2})')
+RE_VERSION_PATTERN = re.compile(r'(\d{2}\.\d{2}(?:\.\d)*(?:-?(?:RC|BETA)\.?\d?)?)')  # 24.04 / 24.04.1 / 24.04-RC.1
 VALID_TRAIN_REGEX = re.compile(r'^\w+[\w.-]*$')
 VERSION_VALIDATION_SCHEMA = {
     'type': 'object',
