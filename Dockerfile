@@ -1,6 +1,6 @@
-FROM debian:bookworm
+FROM ghcr.io/truenas/middleware:master
 
-RUN apt-get update
+RUN /usr/bin/install-dev-tools
 
 RUN apt-get install -y \
       debhelper-compat \
@@ -11,8 +11,7 @@ RUN apt-get install -y \
       python3-jsonschema \
       python3-semantic-version \
       python3-kubernetes \
-      python3-yaml \
-      python3-pip
+      python3-yaml
 
 ENV PYTHONUNBUFFERED 1
 ENV WORK_DIR /app
