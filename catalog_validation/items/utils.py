@@ -61,6 +61,8 @@ ACL_QUESTION = [
                         {
                             'variable': 'id',
                             'label': 'ID',
+                            'description': 'Make sure to check the ID value is correct and aligns with '
+                                           'RunAs user context of the application',
                             'schema': {
                                 'type': 'int',
                                 'required': True,
