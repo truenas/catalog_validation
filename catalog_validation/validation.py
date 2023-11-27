@@ -212,8 +212,7 @@ def validate_catalog_item(catalog_item_path, schema, validate_versions=True):
     verrors.check()
 
 
-def validate_app_migrations(version_path, schema):
-    verrors = ValidationErrors()
+def validate_app_migrations(verrors, version_path, schema):
     app_migration_path = os.path.join(version_path, APP_MIGRATION_DIR)
 
     if not os.path.exists(app_migration_path):
@@ -277,7 +276,7 @@ def validate_catalog_item_version(
         except ValidationErrors as v:
             verrors.extend(v)
 
-    validate_app_migrations(version_path, f'{schema}.app_migrations')
+    validate_app_migrations(verrors, version_path, f'{schema}.app_migrations')
 
     verrors.check()
 
