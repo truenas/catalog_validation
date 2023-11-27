@@ -226,6 +226,7 @@ def test_validate_catalog_item_version(mocker, chart_yaml, should_work):
     mocker.patch('builtins.open', open_file)
     mocker.patch('catalog_validation.validation.validate_questions_yaml', return_value=None)
     mocker.patch('catalog_validation.validation.validate_ix_values_yaml', return_value=None)
+    mocker.patch('catalog_validation.validation.validate_app_migrations', return_value=None)
     if should_work:
         assert validate_catalog_item_version(
             '/mnt/mypool/ix-applications/catalogs/github_com_truenas_charts_git_master/charts/storj/1.0.4',
