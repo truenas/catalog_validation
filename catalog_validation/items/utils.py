@@ -85,7 +85,25 @@ ACL_QUESTION = [
                 }
             }]
         }
-    }
+    },
+    {
+        'variable': 'options',
+        'label': 'ACL Options',
+        'schema': {
+            'type': 'dict',
+            'attrs': [
+                {
+                    'variable': 'force',
+                    'label': 'Force Flag',
+                    'description': 'Enabling `Force` applies ACL even if the path has existing data',
+                    'schema': {
+                        'type': 'boolean',
+                        'default': False,
+                    }
+                },
+            ],
+        },
+    },
 ]
 
 IX_VOLUMES_ACL_QUESTION = [
