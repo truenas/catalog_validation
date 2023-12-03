@@ -26,10 +26,10 @@ TRAIN_IGNORE_DIRS = ['library', 'docs', DEVELOPMENT_DIR] + MIGRATION_DIRS
 ACL_QUESTION = [
     {
         'variable': 'path',
-        'label': 'Path',
-        'description': 'Path to perform ACL',
+        'label': 'Host Path',
+        'description': 'Host Path to perform ACL',
         'schema': {
-            'type': 'string',
+            'type': 'hostpath',
             'required': True,
             'empty': False,
         }
@@ -61,6 +61,8 @@ ACL_QUESTION = [
                         {
                             'variable': 'id',
                             'label': 'ID',
+                            'description': 'Make sure to check the ID value is correct and aligns with '
+                                           'RunAs user context of the application',
                             'schema': {
                                 'type': 'int',
                                 'required': True,
@@ -83,7 +85,25 @@ ACL_QUESTION = [
                 }
             }]
         }
-    }
+    },
+    {
+        'variable': 'options',
+        'label': 'ACL Options',
+        'schema': {
+            'type': 'dict',
+            'attrs': [
+                {
+                    'variable': 'force',
+                    'label': 'Force Flag',
+                    'description': 'Enabling `Force` applies ACL even if the path has existing data',
+                    'schema': {
+                        'type': 'boolean',
+                        'default': False,
+                    }
+                },
+            ],
+        },
+    },
 ]
 
 IX_VOLUMES_ACL_QUESTION = [
