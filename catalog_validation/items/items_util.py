@@ -16,7 +16,7 @@ from .validate_utils import validate_item, validate_item_version
 ITEM_KEYS = ['icon_url']
 
 
-def get_item_details_base() -> dict:
+def get_item_details_base(retrieve_complete_item_keys: bool = True) -> dict:
     return {
         'app_readme': None,
         'categories': [],
@@ -32,11 +32,13 @@ def get_item_details_base() -> dict:
         'name': None,
         'recommended': False,
         'title': None,
-        'versions': {},
         'maintainers': [],
         'tags': [],
         'screenshots': [],
         'sources': [],
+        **({
+            'versions': {},
+        } if retrieve_complete_item_keys else {}),
     }
 
 
