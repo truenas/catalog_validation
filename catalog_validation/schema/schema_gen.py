@@ -1,5 +1,5 @@
 from .attrs import (
-    BooleanSchema, StringSchema, IntegerSchema, PathSchema, HostPathSchema, HostPathDirSchema,
+    BooleanSchema, StringSchema, TextFieldSchema, IntegerSchema, PathSchema, HostPathSchema, HostPathDirSchema,
     HostPathFileSchema, ListSchema, DictSchema, IPAddrSchema, CronSchema, URISchema
 )
 
@@ -14,6 +14,8 @@ def get_schema(schema_data):
         schema = BooleanSchema
     elif s_type == 'string':
         schema = StringSchema
+    elif s_type == 'text':
+        schema = TextFieldSchema
     elif s_type == 'int':
         schema = IntegerSchema
     elif s_type == 'path':
