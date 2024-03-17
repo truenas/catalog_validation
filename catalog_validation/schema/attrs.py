@@ -169,6 +169,10 @@ class TextFieldSchema(StringSchema):
             'max_length': {
                 'type': 'integer',
                 'const': 1024 * 1024
+            },
+            'language': {
+                'type': 'string',
+                'enum': ['yaml', 'json', 'toml', 'text'],
             }
         })
         return schema
