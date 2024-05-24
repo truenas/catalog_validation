@@ -5,6 +5,7 @@ import os
 import yaml
 
 from jsonschema import validate as json_schema_validate, ValidationError as JsonValidationError
+from middlewared.validators import validate_filters
 from semantic_version import Version
 from typing import Optional
 
@@ -439,6 +440,9 @@ def validate_question(question_data, schema, verrors, validate_top_level_attrs=N
 
     schema_data = question_data['schema']
     variable_type = schema_data['type']
+
+    if filters := schema_data.get('show_if'):
+        validate_filters(filters)
 
     for condition, key, schema_str in (
         (variable_type != 'list', 'subquestions', f'{schema}.schema.subquestions'),
